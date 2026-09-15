@@ -1,0 +1,13 @@
+{
+  "name": "alfonsmaybach/today-friday",
+  "description": "Paid Friday checker",
+  "type": "project",
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "TodayFriday\\": "src/"
+    }
+  }
+}
