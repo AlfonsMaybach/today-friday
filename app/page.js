@@ -76,7 +76,7 @@ export default function Home() {
 
   return (
     <main className={`experience phase-${phase}`}>
-      <Image className="hero-art" src="/city-storm-v41.png" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
+      <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
       <div className="ambient-glow" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <section className="interaction" aria-live="polite">
