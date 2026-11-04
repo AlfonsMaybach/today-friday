@@ -76,12 +76,14 @@ export default function Home() {
 
   return (
     <main className={`experience phase-${phase}`}>
-      <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
+      <div className="hero-stage">
+        <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
+        {phase === 'idle' && <button className="truth-button" onClick={start}><span>Узнать правду</span><b aria-hidden="true">→</b></button>}
+      </div>
       <div className="ambient-glow" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <section className="interaction" aria-live="polite">
         <h1 className="sr-only">Сегодня пятница?</h1>
-        {phase === 'idle' && <button className="truth-button" onClick={start}><span>Узнать правду</span><b aria-hidden="true">→</b></button>}
         {phase === 'processing' && <div className="status-card" role="status"><p>{status}</p><div className="progress-label"><span>ПРОВЕРКА</span><b>{progress}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>}
         {phase === 'error' && <div className="status-card status-error" role="alert"><p>{status}</p><button className="retry-button" onClick={reset}>Попробовать ещё раз</button></div>}
         {hasResult && <section className={`result-card ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="retry-button" onClick={reset}>Проверить ещё раз · 99 ₽</button></section>}
