@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap');
 :root { color-scheme: dark; } * { box-sizing: border-box; } html,body { min-height:100%; margin:0; } body { background:#05080d; font-family:Montserrat,Arial,sans-serif; } button { font:inherit; }
-.experience { isolation:isolate; min-height:max(100svh,680px); overflow:hidden; position:relative; background:#05080d; }
+.experience { isolation:isolate; height:max(100svh,680px); min-height:max(100svh,680px); overflow:hidden; position:relative; background:#05080d; }
 .hero-stage { position:absolute; top:50%; left:50%; width:max(100%,150svh); aspect-ratio:3/2; z-index:0; transform:translate(-50%,-50%) scale(1.008); animation:cinematic-drift 15s ease-in-out infinite alternate; }
 .hero-art { object-fit:cover; object-position:center; }
 .ambient-glow { position:absolute; inset:-15%; z-index:-3; pointer-events:none; background:radial-gradient(ellipse at 49% 34%,rgba(255,195,92,.13),transparent 28%),radial-gradient(ellipse at 50% 57%,transparent 40%,rgba(0,0,0,.34) 84%); mix-blend-mode:screen; animation:cloud-light 4.8s ease-in-out infinite; }
