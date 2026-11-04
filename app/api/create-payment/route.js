@@ -15,16 +15,17 @@ export async function POST() {
     );
   }
 
-  // Temporary test mode. Replace with provider-confirmed payment status
-  // before accepting real money.
-  const status = process.env.STUB_AUTO_PAY === 'true' ? 'paid' : 'pending';
+  // Test-only mode. Replace with provider-confirmed payment status before accepting money.
+  const status = process.env.PAYMENT_TEST_MODE === 'true' ? 'paid' : 'pending';
+  const createdAt = Date.now();
 
   const payload = {
     id: crypto.randomUUID(),
     status,
     amount: Number(process.env.PAYMENT_AMOUNT || 99),
     currency: process.env.PAYMENT_CURRENCY || 'RUB',
-    createdAt: Date.now()
+    createdAt,
+    expiresAt: createdAt + 15 * 60 * 1000
   };
 
   return NextResponse.json({

@@ -11,7 +11,7 @@
 - ответ нельзя получить из HTML/JS заранее;
 - есть серверные API routes;
 - есть тестовый платежный режим `stub`;
-- при `STUB_AUTO_PAY=true` тестовая оплата подтверждается автоматически;
+- при `PAYMENT_TEST_MODE=true` тестовая оплата подтверждается автоматически;
 - секреты предполагаются только через Vercel Environment Variables.
 
 ## Локально
@@ -28,19 +28,20 @@ npm run dev
 
 1. Импортируйте GitHub-репозиторий в Vercel.
 2. Framework Preset должен определиться как Next.js.
-3. Build Command: `next build` (обычно автоматически).
+3. Framework Preset: Next.js; не указывайте `Next.js default` как Build Command. Build Command должен быть пустым (Vercel использует `npm run build`) либо `next build`.
 4. Добавьте Environment Variables:
    - `PAYMENT_PROVIDER=stub`
-   - `STUB_AUTO_PAY=true`
+   - `PAYMENT_TEST_MODE=true` только для тестового окружения
    - `PAYMENT_AMOUNT=99`
    - `PAYMENT_CURRENCY=RUB`
    - `APP_TIMEZONE=Europe/Moscow`
+   - `PAYMENT_WEBHOOK_SECRET` — длинное случайное значение, заданное как Vercel Secret
 5. Deploy.
 
 ## Важно про MVP
 Текущий `stub` хранит состояние платежа внутри подписанного токена, поэтому внешняя БД для тестового сценария не нужна. В production это будет заменено реальной платежной системой: сервер создаёт платеж у провайдера, а статус проверяется у провайдера/через webhook.
 
-Никаких реальных ключей в GitHub не добавлять.
+Никаких реальных ключей в GitHub не добавлять. Тестовый токен действует 15 минут; без `PAYMENT_WEBHOOK_SECRET` API намеренно вернёт ошибку вместо небезопасного дефолтного секрета.
 
 ## Версия v2
 
@@ -49,11 +50,10 @@ npm run dev
 - Требуется Node.js 20.9+.
 - Удалены вспомогательные `ENV-EXAMPLE.txt` и `GITIGNORE.txt`.
 
-## V4.city
+## V4.1
 Final city/lounge visual direction.
-- Animated volumetric storm cloud built in CSS (no GIF dependency).
-- Short side lightning flashes.
-- Dark luxury / gold city design.
-- Larger, higher-contrast offer copy.
+- Restored original full-frame photorealistic city and storm asset (`public/city-storm-v41.png`).
+- Slow cinematic cloud movement and light pulses, with a reduced-motion fallback.
+- Dark luxury / gold city design retained without duplicate CSS cloud shapes.
 - Footer slogan: «ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.»
 - Existing Vercel server API and payment stub retained.
