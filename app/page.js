@@ -211,7 +211,6 @@ export default function Home() {
       </section>
       {phase === 'friday' && <div className="celebration" aria-hidden="true" />}
       <DiagnosticPanel report={diagnosticReport} onClose={() => setDiagnosticReport(null)} />
-      {checkout && checkoutOpen && <div className="checkout-overlay" role="presentation"><section className="checkout-modal" role="dialog" aria-modal="true" aria-label="Оплата через Точку"><button className="checkout-close" type="button" onClick={() => setCheckoutOpen(false)} aria-label="Свернуть окно оплаты">×</button><span className="checkout-eyebrow">TODAY FRIDAY · ОПЛАТА</span><h2>{checkout.amount} ₽</h2><p className="checkout-lead">Сканируйте код телефоном, чтобы открыть защищённую страницу оплаты Точки.</p><div className="checkout-qr"><img src={checkout.qrSrc} alt="QR-код для открытия страницы оплаты Точки на телефоне" width="216" height="216" /></div><p className="checkout-caption">Это QR-ссылка на страницу Точки, не прямой QR СБП. Оплата и чек оформляются банком.</p><a className="checkout-action" href={checkout.paymentUrl}>Открыть оплату в Точке ↗</a><p className="checkout-wait">После оплаты результат появится здесь автоматически.</p></section></div>}
       <footer className="desktop-footer"><span>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</span><nav aria-label="Юридическая информация"><a href="/privacy">Политика</a><a href="/offer">Оферта</a><a href="/contacts">Контакты</a></nav></footer>
     </main>
     <main className={`mobile-experience phase-${phase}`}>
@@ -228,6 +227,7 @@ export default function Home() {
       <footer className="mobile-footer"><span>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</span><nav aria-label="Юридическая информация"><a href="/privacy">Политика</a><a href="/offer">Оферта</a><a href="/contacts">Контакты</a></nav></footer>
       {phase === 'friday' && <div className="celebration" aria-hidden="true" />}
     </main>
+      {checkout && checkoutOpen && <div className="checkout-overlay" role="presentation"><section className="checkout-modal" role="dialog" aria-modal="true" aria-label="Оплата через Точку"><button className="checkout-close" type="button" onClick={() => setCheckoutOpen(false)} aria-label="Свернуть окно оплаты">×</button><span className="checkout-eyebrow">TODAY FRIDAY · ОПЛАТА</span><h2>{checkout.amount} ₽</h2><p className="checkout-lead">Сканируйте код телефоном, чтобы открыть защищённую страницу оплаты Точки.</p><div className="checkout-qr"><img src={checkout.qrSrc} alt="QR-код для открытия страницы оплаты Точки на телефоне" width="216" height="216" /></div><p className="checkout-caption">Это QR-ссылка на страницу Точки, не прямой QR СБП. Оплата и чек оформляются банком.</p><a className="checkout-action" href={checkout.paymentUrl}>Открыть оплату в Точке ↗</a><p className="checkout-wait">После оплаты результат появится здесь автоматически.</p></section></div>}
     </>
   );
 }
