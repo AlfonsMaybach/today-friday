@@ -10,3 +10,44 @@
 .retry-button { margin-top:18px; border:1px solid #ffe0a0; border-radius:999px; padding:13px 20px; cursor:pointer; color:#15100a; background:linear-gradient(130deg,#ffeab5,#cc8e2d); font-size:11px; font-weight:700; letter-spacing:.06em; }.result-card { position:relative; margin-top:4vh; padding:34px 30px 30px; animation:result-in .55s ease-out both; }.result-card>p { margin:0; color:#e9c276; font-size:9px; font-weight:700; letter-spacing:.22em; }.result-card h2 { margin:8px 0 2px; color:#ffe1a1; font-family:Georgia,serif; font-size:clamp(92px,14vw,154px); line-height:.84; text-shadow:0 0 24px rgba(255,191,73,.42); }.result-card>span { display:block; font-size:13px; letter-spacing:.03em; }.result-card.is-friday { border-color:rgba(255,216,117,.84); box-shadow:0 0 75px rgba(241,174,44,.28),inset 0 1px rgba(255,255,255,.13); }.celebration { position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; background:radial-gradient(circle at 50% 46%,rgba(255,218,128,.26),transparent 4%,transparent 34%); animation:celebrate 1.3s ease-out infinite; }.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 @keyframes cinematic-drift { from { transform:translate(-50%,-50%) scale(1.008) translate3d(-.12%,0,0); } to { transform:translate(-50%,-50%) scale(1.025) translate3d(.12%,-.1%,0); } } @keyframes cloud-light { 0%,100% { opacity:.38; } 46% { opacity:.92; } 51% { opacity:.48; } 54% { opacity:.83; } } @keyframes result-in { from { opacity:0; transform:scale(.94) translateY(14px); } to { opacity:1; transform:scale(1) translateY(0); } } @keyframes celebrate { 0% { opacity:0; transform:scale(.25); } 35% { opacity:1; } 100% { opacity:0; transform:scale(1.8); } }
 @media (max-width:720px) { .experience { min-height:max(100svh,620px); }.status-card { margin-top:18vh; padding:24px 20px 21px; }.result-card { margin-top:14vh; } } @media (prefers-reduced-motion:reduce) { .hero-stage,.ambient-glow,.celebration { animation:none; }.progress-track i { transition:none; } }
+
+.mobile-experience { display:none; }
+@media (max-width:720px) {
+  html,body { width:100%; overflow-x:hidden; }
+  .desktop-experience { display:none; }
+  .mobile-experience { isolation:isolate; position:relative; display:block; width:100%; height:100svh; min-height:620px; overflow:hidden; color:#fff6e2; background:#05080d; }
+  .mobile-art { object-fit:cover; object-position:center top; z-index:-4; }
+  .mobile-vignette { position:absolute; inset:0; z-index:-3; pointer-events:none; background:linear-gradient(180deg,rgba(2,5,9,.25),transparent 24%,rgba(2,5,9,.08) 58%,rgba(2,5,9,.84) 100%); }
+  .mobile-nav { position:absolute; z-index:2; top:max(16px,env(safe-area-inset-top)); left:18px; right:18px; height:38px; display:flex; align-items:center; justify-content:space-between; color:#ffdaa0; font-size:11px; font-weight:700; letter-spacing:.2em; }
+  .mobile-nav button { display:grid; place-content:center; gap:4px; width:38px; height:34px; padding:0; border:1px solid rgba(255,224,162,.58); border-radius:10px; background:rgba(5,8,13,.42); color:#ffe4a8; }
+  .mobile-nav i { display:block; width:16px; height:1px; background:currentColor; }
+  .mobile-content { position:absolute; z-index:1; top:12.5%; left:0; right:0; display:flex; flex-direction:column; align-items:center; padding:0 22px; text-align:center; }
+  .mobile-content h1 { margin:0; color:#ffe0a0; font-family:Georgia,serif; font-size:clamp(44px,14vw,64px); line-height:.84; letter-spacing:-.045em; text-shadow:0 3px 24px rgba(0,0,0,.68); }
+  .mobile-content>p { margin:18px 0 7px; font-size:clamp(10px,2.7vw,12px); font-weight:700; letter-spacing:.2em; line-height:1.55; }
+  .mobile-content>strong { display:block; color:#ffe0a0; font-family:Georgia,serif; font-size:clamp(58px,18vw,78px); line-height:.95; text-shadow:0 2px 20px rgba(0,0,0,.66); }
+  .mobile-truth-button { width:min(86vw,360px); height:56px; margin-top:14px; border:0; border-radius:999px; background:linear-gradient(135deg,#fff0c5 0%,#ffdc8d 48%,#c78324 100%); box-shadow:0 8px 24px rgba(0,0,0,.42),inset 0 1px 1px rgba(255,255,255,.74); color:#17120c; font-size:clamp(12px,3.4vw,14px); font-weight:700; letter-spacing:.035em; }
+  .mobile-truth-button b { padding-left:8px; font-size:22px; vertical-align:-2px; }
+  .mobile-content>small { margin-top:10px; font-size:10px; color:#fff4dc; opacity:.92; }
+  .mobile-benefits { position:absolute; z-index:1; left:22px; right:22px; bottom:54px; display:grid; gap:10px; }
+  .mobile-benefits article { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:2px; min-height:42px; padding:6px 7px; border-top:1px solid rgba(255,213,140,.24); text-align:center; }
+  .mobile-benefits article>b { width:23px; color:#fbd488; font-size:21px; font-weight:400; line-height:1; text-align:center; }
+  .mobile-benefits span { display:flex; min-width:0; align-items:center; flex-direction:column; gap:2px; }
+  .mobile-benefits strong { font-size:9px; letter-spacing:.09em; }
+  .mobile-benefits small { color:#f6ead6; font-size:9px; opacity:.78; }
+  .mobile-footer { position:absolute; z-index:1; right:16px; bottom:max(15px,env(safe-area-inset-bottom)); left:16px; overflow:hidden; color:#ffe4a5; font-size:8px; letter-spacing:.16em; text-align:center; white-space:nowrap; }
+  .mobile-status,.mobile-result { width:min(86vw,350px); margin-top:23vh; border:1px solid rgba(255,221,157,.48); border-radius:20px; padding:23px 20px; background:rgba(4,7,12,.76); box-shadow:0 18px 60px rgba(0,0,0,.56); backdrop-filter:blur(12px); }
+  .mobile-result-heading { margin:0; color:#ffe0a0; font-family:Georgia,serif; font-size:clamp(42px,13vw,60px); line-height:.84; letter-spacing:-.045em; text-align:center; text-shadow:0 3px 24px rgba(0,0,0,.68); }
+  .mobile-result { margin-top:17px; }
+  .mobile-status p { margin:0 0 18px; font-size:12px; line-height:1.55; }.mobile-status>div { display:flex; justify-content:space-between; color:#f3cf89; font-size:9px; letter-spacing:.14em; }.mobile-status>i { display:block; height:5px; overflow:hidden; margin-top:8px; border-radius:8px; background:rgba(255,255,255,.18); }.mobile-status>i em { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#ae7628,#ffdfa0); transition:width .1s linear; }
+  .mobile-result p { margin:0; color:#e9c276; font-size:8px; font-weight:700; letter-spacing:.18em; }.mobile-result h2 { margin:7px 0 3px; color:#ffe1a1; font-family:Georgia,serif; font-size:86px; line-height:.86; text-shadow:0 0 24px rgba(255,191,73,.42); }.mobile-result>span { font-size:12px; }.mobile-retry { margin-top:16px; border:0; border-radius:999px; padding:12px 18px; background:linear-gradient(130deg,#ffeab5,#cc8e2d); color:#15100a; font-size:10px; font-weight:700; }
+}
+.mobile-email-form { display:grid; gap:10px; width:min(88vw,340px); margin:14px auto 0; padding:14px; border:1px solid rgba(255,220,150,.38); border-radius:14px; background:rgba(8,10,17,.78); backdrop-filter:blur(10px); }
+.mobile-email-form label { display:grid; gap:6px; color:#ffe0a0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+.mobile-email-form input { width:100%; box-sizing:border-box; border:1px solid rgba(255,224,160,.55); border-radius:8px; padding:11px 12px; color:#fff; background:#161722; font:inherit; letter-spacing:0; text-transform:none; }
+.mobile-email-form button { border:0; border-radius:8px; padding:12px; color:#17100a; background:#d8a84d; font-weight:800; letter-spacing:.08em; }
+.email-form { position:absolute; z-index:5; left:50%; top:61%; transform:translate(-50%,-50%); width:280px; display:grid; gap:10px; padding:18px; border:1px solid rgba(255,224,160,.4); border-radius:14px; background:rgba(7,9,15,.9); box-shadow:0 18px 60px rgba(0,0,0,.45); }
+.email-form label { display:grid; gap:8px; color:#ffe0a0; font-size:12px; }
+.email-form>strong { color:#ffe0a0; font-size:14px; text-align:center; }
+.email-form input { border:1px solid rgba(255,224,160,.55); border-radius:8px; padding:10px; background:#171722; color:#fff; }
+.email-form button { border:0; border-radius:8px; padding:10px; background:#d8a84d; color:#17100a; font-weight:800; }
+.mobile-email-form>b { color:#ffe0a0; font-size:13px; }
