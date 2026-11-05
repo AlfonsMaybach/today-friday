@@ -51,3 +51,18 @@
 .email-form input { border:1px solid rgba(255,224,160,.55); border-radius:8px; padding:10px; background:#171722; color:#fff; }
 .email-form button { border:0; border-radius:8px; padding:10px; background:#d8a84d; color:#17100a; font-weight:800; }
 .mobile-email-form>b { color:#ffe0a0; font-size:13px; }
+
+/* Secure checkout is always a top-level overlay, shared by desktop and mobile layouts. */
+.checkout-overlay { position:fixed; z-index:100; inset:0; display:grid; place-items:center; padding:20px; background:rgba(1,3,8,.76); backdrop-filter:blur(13px); }
+.checkout-modal { position:relative; width:min(100%,390px); max-height:calc(100dvh - 30px); overflow:auto; padding:30px 28px 25px; text-align:center; border:1px solid rgba(255,213,128,.55); border-radius:23px; background:linear-gradient(155deg,#171923,#090b11 80%); box-shadow:0 28px 90px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.08); color:#fff0cf; }
+.checkout-close { position:absolute; right:14px; top:11px; width:36px; height:36px; border:0; background:transparent; color:#e9c785; font-size:28px; cursor:pointer; }
+.checkout-eyebrow { color:#e7c37d; font-size:10px; letter-spacing:.23em; font-weight:700; }
+.checkout-modal h2 { margin:11px 0 6px; font:normal 64px/.95 Georgia,serif; color:#ffdf9b; text-shadow:0 0 25px rgba(236,177,73,.18); }
+.checkout-lead { margin:12px auto 16px; max-width:300px; font-size:12px; line-height:1.6; }
+.checkout-qr { display:inline-flex; align-items:center; justify-content:center; padding:11px; border-radius:15px; background:#fff; box-shadow:0 8px 25px rgba(0,0,0,.32); }
+.checkout-qr img { display:block; width:min(216px,55vw); height:auto; aspect-ratio:1; }
+.checkout-caption { margin:13px auto 17px; color:#d5c4a7; font-size:10px; line-height:1.55; }
+.checkout-action { display:block; width:100%; padding:15px 18px; border-radius:999px; background:linear-gradient(130deg,#ffeab5,#cc8e2d); color:#17100a; font-size:12px; font-weight:800; text-decoration:none; }
+.checkout-action:focus-visible,.checkout-close:focus-visible { outline:2px solid #ffe5ac; outline-offset:3px; }
+.checkout-wait { margin:14px 0 0; color:#e0c68e; font-size:11px; line-height:1.5; }
+@media (max-width:720px) { .checkout-modal { padding:27px 21px 22px; } .checkout-modal h2 { font-size:54px; } .checkout-qr { display:none; } .checkout-caption { display:none; } .checkout-lead { margin-bottom:23px; } }
