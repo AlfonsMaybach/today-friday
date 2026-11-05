@@ -44,17 +44,15 @@ test('missing JWT is classified before fetch', async () => {
 test('HTTP request stage succeeds only after Response is received', async () => {
   const previous = process.env.TOCHKA_JWT;
   process.env.TOCHKA_JWT = 'test-only';
-  const originalFetch = globalThis.fetch;
   const events = [];
-  globalThis.fetch = async (url) => {
-    if (url.includes('/open-banking/')) return new Response(JSON.stringify({ Data: { Customer: { customerType: 'Business', customerCode: 'c1' } } }), { status: 200 });
-    return new Response(JSON.stringify({ Data: { Retailer: { merchantId: 'm1' } } }), { status: 200 });
+  const requestFn = async (url) => {
+    const body = url.includes('/open-banking/') ? { Data: { Customer: { customerType: 'Business', customerCode: 'c1' } } } : { Data: { Retailer: { merchantId: 'm1' } } };
+    return { status: 200, ok: true, text: async () => JSON.stringify(body) };
   };
-  await discoverCustomerAndMerchant((name, status, result) => events.push({ name, status, result }));
+  await discoverCustomerAndMerchant((name, status, result) => events.push({ name, status, result }), requestFn);
   const requestEvents = events.filter((event) => event.name === 'HTTP-запрос к Точке');
   assert.deepEqual(requestEvents.map((event) => event.result), ['START', 'SUCCESS', 'START', 'SUCCESS']);
   assert.equal(requestEvents[1].status, 200);
   assert.equal(requestEvents[3].status, 200);
-  globalThis.fetch = originalFetch;
   if (previous === undefined) delete process.env.TOCHKA_JWT; else process.env.TOCHKA_JWT = previous;
 });

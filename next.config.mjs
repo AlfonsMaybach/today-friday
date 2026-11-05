@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  outputFileTracingIncludes: { '/*': ['./certs/*.pem'] },
   async headers() {
     return [{
       source: '/:path*',
