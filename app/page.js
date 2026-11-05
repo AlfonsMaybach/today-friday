@@ -199,13 +199,14 @@ export default function Home() {
     <main className={`experience desktop-experience phase-${phase}`}>
       <div className="hero-stage">
         <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" unoptimized />
+        <div className="hero-heading"><h1>Сегодня<br />пятница?</h1></div>
+        <p className="hero-subheading">ПОЛУЧИ ТОЧНЫЙ ОТВЕТ<br />ВСЕГО ЗА</p>
         <div className="hero-live-price" aria-label={`Стоимость: ${paymentAmount} рублей`}><span aria-hidden="true">{paymentAmount} ₽</span></div>
         {phase === 'idle' && <><button className="truth-button" onClick={start}><span>Узнать правду</span><b aria-hidden="true">→</b></button>{emailOpen && <form className="email-form" onSubmit={start}><strong>К оплате сейчас: {paymentAmount} ₽</strong><label>Укажите email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /><button type="submit">Перейти к оплате</button></label><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}</>}
       </div>
       <div className="ambient-glow" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <section className="interaction" aria-live="polite">
-        <h1 className="sr-only">Сегодня пятница?</h1>
         {phase === 'processing' && <div className="status-card" role="status"><p>{status}</p>{checkout && !checkoutOpen && <button className="retry-button" type="button" onClick={() => setCheckoutOpen(true)}>Показать QR-код</button>}<div className="progress-label"><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : progressStage === 'payment' ? 'ОПЛАТА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>}
         {phase === 'error' && <div className="status-card status-error" role="alert"><p>{status}</p><button className="retry-button" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button></div>}
         {hasResult && <section className={`result-card ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="retry-button" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button></section>}
