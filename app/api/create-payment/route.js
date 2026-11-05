@@ -22,7 +22,7 @@ export async function POST() {
   const payload = {
     id: crypto.randomUUID(),
     status,
-    amount: Number(process.env.PAYMENT_AMOUNT || 99),
+    amount: Number(process.env.PAYMENT_AMOUNT || 50),
     currency: process.env.PAYMENT_CURRENCY || 'RUB',
     createdAt: Date.now()
   };
