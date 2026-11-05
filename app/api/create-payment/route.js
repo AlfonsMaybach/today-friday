@@ -29,7 +29,7 @@ export async function POST(request) {
   if (provider === 'tochka') {
     const id = crypto.randomUUID();
     const amountKopecks = Number(process.env.PAYMENT_AMOUNT_KOPECKS || 100);
-    const displayAmountKopecks = Number(process.env.PAYMENT_DISPLAY_AMOUNT_KOPECKS || 9900);
+    const displayAmountKopecks = Number(process.env.PAYMENT_DISPLAY_AMOUNT_KOPECKS || 5000);
     const paymentLinkId = `tf-${id}`;
     const accessToken = createPaymentToken({ id, type: 'order-access', createdAt: Date.now(), expiresAt: Date.now() + 60 * 60 * 1000 });
     const orderStage = stage('Создание заказа в Neon');
