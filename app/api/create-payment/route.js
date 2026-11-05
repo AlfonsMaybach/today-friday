@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createPaymentToken } from '../../../lib/payment-token';
 import { createOrder, updateOrder, consumeRateLimit } from '../../../lib/db';
 import { createPayment, discoverCustomerAndMerchant, TochkaApiError } from '../../../lib/tochka';
-import { diagnosticsEnabled, createDiagnostics, startStage, safeDiagnosticError } from '../../../lib/payment-diagnostics';
+import { diagnosticsEnabled, createDiagnostics, startStage, safeDiagnosticError, markProviderFailure } from '../../../lib/payment-diagnostics';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -43,11 +43,11 @@ export async function POST(request) {
         finish(handle, { httpStatus, result });
         if (result !== 'RUNNING') activeProviderStages.delete(name);
       };
-      const { customerCode, merchantId } = await discoverCustomerAndMerchant((name, httpStatus) => providerStage(name, httpStatus));
+      const { customerCode, merchantId } = await discoverCustomerAndMerchant((name, httpStatus, result) => providerStage(name, httpStatus, result));
       const origin = new URL(request.url).origin;
       providerCallStarted = true;
       const paymentStage = stage('POST payments_with_receipt');
-      const payment = await createPayment({ customerCode, merchantId, amount: amountKopecks / 100, paymentLinkId, email, redirectUrl: `${origin}/?payment=${id}`, failRedirectUrl: `${origin}/?payment=failed`, onStage: (name, httpStatus) => providerStage(name, httpStatus) });
+      const payment = await createPayment({ customerCode, merchantId, amount: amountKopecks / 100, paymentLinkId, email, redirectUrl: `${origin}/?payment=${id}`, failRedirectUrl: `${origin}/?payment=failed`, onStage: (name, httpStatus, result) => providerStage(name, httpStatus, result) });
       finish(paymentStage); const parseStage = stage('Разбор ответа банка'); finish(parseStage); if (diagnostics) diagnostics.providerRequestId = null;
       const saveStage = stage('Сохранение банковской операции');
       await updateOrder(id, { provider_operation_id: payment.operationId, payment_url: payment.paymentUrl, customer_code: customerCode, merchant_id: merchantId, status: 'pending' }); finish(saveStage);
@@ -60,7 +60,7 @@ export async function POST(request) {
       const requestId = error instanceof TochkaApiError ? error.requestId : null;
       const diagnostic = { stage: error instanceof TochkaApiError ? error.stage : providerCallStarted ? 'create-payment' : 'discover-customer-merchant', status: error instanceof TochkaApiError ? error.status : 0, code: error instanceof TochkaApiError ? error.code : 'INTEGRATION_ERROR', requestId };
       console.error('payment_creation_failed', diagnostic);
-      const failure = safeDiagnosticError(error); if (diagnostics) { diagnostics.providerRequestId = requestId; const current = diagnostics.stages.find((item) => item.result === 'RUNNING'); if (current) { current.result = 'FAILED'; current.durationMs = Date.now() - Date.parse(current.startedAt); current.httpStatus = failure.httpStatus; current.errorCode = failure.errorCode; diagnostics.failedStage = current.name; diagnostics.errorCode = failure.errorCode; diagnostics.providerHttpStatus = failure.httpStatus; } }
+      if (diagnostics) { diagnostics.providerRequestId = requestId; markProviderFailure(diagnostics, error); }
       await updateOrder(id, { status: providerCallStarted ? 'pending' : 'failed' });
       const response = NextResponse.json({ error: 'Не удалось создать платёж.', requestId: requestId || id.slice(0, 8), ...(diagnostics ? { diagnostics } : {}) }, { status: 502 });
       return setRateCookie(response);

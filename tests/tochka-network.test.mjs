@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyNetworkError, discoverCustomerAndMerchant, TochkaApiError } from '../lib/tochka.js';
+import { createDiagnostics, startStage, markProviderFailure } from '../lib/payment-diagnostics.js';
 
 test('network diagnostics keep only allowlisted cause codes', () => {
   assert.equal(classifyNetworkError({ cause: { code: 'ENOTFOUND' } }), 'ENOTFOUND');
@@ -12,6 +13,17 @@ test('network diagnostics keep only allowlisted cause codes', () => {
 test('network diagnostics inspect nested causes without exposing unknown codes', () => {
   assert.equal(classifyNetworkError({ cause: { cause: { code: 'CERT_HAS_EXPIRED' } } }), 'CERT_HAS_EXPIRED');
   assert.equal(classifyNetworkError({ cause: { cause: { code: 'PRIVATE_TOKEN' } } }), 'FETCH_FAILED');
+  assert.equal(classifyNetworkError({ cause: { code: 'UNKNOWN', cause: { code: 'ENOTFOUND' } } }), 'ENOTFOUND');
+});
+
+test('diagnostic regression marks active request stage failed after fetch exception', () => {
+  const report = createDiagnostics();
+  startStage(report, 'HTTP-запрос к Точке');
+  markProviderFailure(report, new TochkaApiError({ stage: 'get-customers:fetch', code: 'ENOTFOUND' }));
+  assert.equal(report.stages[0].result, 'FAILED');
+  assert.equal(report.stages[0].errorCode, 'ENOTFOUND');
+  assert.equal(report.failedStage, 'HTTP-запрос к Точке');
+  assert.equal(report.errorCode, 'ENOTFOUND');
 });
 
 test('missing JWT is classified before fetch', async () => {
