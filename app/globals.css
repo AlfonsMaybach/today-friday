@@ -80,7 +80,6 @@
   color:#ffdea2; font-family:Georgia,'Times New Roman',serif;
   font-size:clamp(62px,7vw,132px); font-weight:700;
   line-height:1; white-space:nowrap; letter-spacing:-.045em;
-  -webkit-font-smoothing:antialiased;
 }
 
 /* V4.1 typography pass: the original JPG is untouched. Native browser text
@@ -104,7 +103,7 @@
     margin:0;
     color:#ffdfa3;
     font-family:Georgia,'Times New Roman',serif;
-    font-size:clamp(55px,6.6vw,113px);
+    font-size:clamp(55px,6.6vw,136px);
     font-weight:700;
     line-height:.83;
     letter-spacing:-.055em;
@@ -160,7 +159,7 @@
     border:1px solid rgba(255,233,176,.8);
     box-shadow:0 8px 24px rgba(0,0,0,.43),inset 0 1px 1px rgba(255,255,255,.6);
     color:#19120b;
-    font-size:clamp(12px,1.22vw,19px);
+    font-size:clamp(12px,1.22vw,24px);
     font-weight:800;
     letter-spacing:.025em;
     text-transform:uppercase;
