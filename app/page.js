@@ -129,7 +129,7 @@ export default function Home() {
     if (phase === 'processing') return;
     if (!emailOpen) {
       setEmailOpen(true);
-      fetch('/api/payment-config').then((response) => response.json()).then((config) => setPaymentAmount(config.actualAmount || 99)).catch(() => {});
+      fetch('/api/payment-config').then((response) => response.json()).then((config) => setPaymentAmount(config.actualAmount || 50)).catch(() => {});
       return;
     }
     setProgressStage('preparation');
