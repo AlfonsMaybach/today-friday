@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readPaymentToken } from '../../../lib/payment-token';
-import { getOrder, updateOrder, consumeRateLimit } from '../../../lib/db';
+import { getOrder, consumeRateLimit } from '../../../lib/db';
 import { confirmTochkaOrder } from '../../../lib/payment-confirmation';
 
 export const runtime = 'nodejs';
@@ -22,7 +22,6 @@ export async function GET(request) {
       if (!order.provider_operation_id) return NextResponse.json({ paymentId: null, status: order.status, amount: order.amount_kopecks / 100, currency: order.currency });
       const confirmation = await confirmTochkaOrder(order);
       const status = confirmation.status;
-      if (status === 'failed') await updateOrder(order.id, { status });
       return NextResponse.json({ paymentId: order.provider_operation_id, status, amount: order.amount_kopecks / 100, currency: order.currency });
     }
     const token = new URL(request.url).searchParams.get('token');
