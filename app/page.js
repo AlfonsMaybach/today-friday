@@ -55,7 +55,7 @@ export default function Home() {
           await sleep(2000);
         }
         throw new Error('Платёж пока не подтверждён.');
-      } catch (error) { if (!cancelled) { setStatus(error.message); setPhase('error'); } }
+      } catch (error) { if (!cancelled) { setStatus(error.message === 'Платёж не найден.' ? 'Доступ к заказу на этом устройстве отсутствует. Если вы сканировали QR с телефона, результат появится на устройстве, где начинали оплату.' : error.message); setPhase('error'); } }
     })();
     return () => { cancelled = true; };
   }, []);
