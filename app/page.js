@@ -107,7 +107,7 @@ export default function Home() {
             <>
               <h1>Сегодня<br/><em>пятница?</em></h1>
               <p className="offer">ПОЛУЧИ ТОЧНЫЙ ОТВЕТ<br/>ВСЕГО ЗА</p>
-              <div className="price">99 ₽</div>
+              <div className="price">50 ₽</div>
             </>
           ) : (
             <div className="truth">
@@ -123,7 +123,7 @@ export default function Home() {
             <aside><i style={{width:progress+'%'}}/></aside>
           </div>}
           {phase==='error' && <div className="process error"><div><span>{status}</span></div><button className="cta" onClick={reset}>ПОВТОРИТЬ <b>↻</b></button></div>}
-          {finished && <button className="cta" onClick={reset}>ПРОВЕРИТЬ ЕЩЁ РАЗ · 99 ₽ <b>↻</b></button>}
+          {finished && <button className="cta" onClick={reset}>ПРОВЕРИТЬ ЕЩЁ РАЗ · 50 ₽ <b>↻</b></button>}
 
           <div className="benefits">
             <article><strong>♢</strong><b>100% точность</b><span>Проверяем по<br/>реальному времени</span></article>
