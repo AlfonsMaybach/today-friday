@@ -21,7 +21,7 @@ function safeCode(error) {
 
 async function measure(task, fallbackCode = 'UNKNOWN_NETWORK_ERROR') {
   const started = performance.now();
-  try { return { success: true, durationMs: Math.round(performance.now() - started), ...(await task()) }; }
+  try { const result = await task(); return { success: true, durationMs: Number((performance.now() - started).toFixed(2)), ...result }; }
   catch (error) { const code = safeCode(error); return { success: false, durationMs: Math.round(performance.now() - started), errorCode: code === 'UNKNOWN_NETWORK_ERROR' ? fallbackCode : code }; }
 }
 
