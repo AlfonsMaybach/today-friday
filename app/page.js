@@ -25,12 +25,14 @@ export default function Home() {
     let cancelled = false;
     (async () => {
       try {
-        setPhase('processing'); setStatus('Проверяем подтверждение оплаты…');
+        setPhase('processing'); setStatus('Проверяем подтверждение оплаты…'); setProgress(8);
         for (let attempt = 0; attempt < 30; attempt += 1) {
+          if (!cancelled) setProgress(Math.min(92, 8 + (attempt * 3)));
           const payment = await api(`/api/payment-status?orderId=${encodeURIComponent(orderId)}`);
           if (payment.status === 'paid') {
+            if (!cancelled) setProgress(96);
             const answer = await api(`/api/result?orderId=${encodeURIComponent(orderId)}`);
-            if (!cancelled) { setResult(answer); setPhase(answer.isFriday ? 'friday' : 'not-friday'); }
+            if (!cancelled) { setProgress(100); setResult(answer); setPhase(answer.isFriday ? 'friday' : 'not-friday'); }
             return;
           }
           if (payment.status === 'failed') throw new Error('Платёж не подтверждён.');
