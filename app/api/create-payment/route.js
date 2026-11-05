@@ -19,6 +19,7 @@ export async function POST() {
   // before accepting real money.
   const status = process.env.STUB_AUTO_PAY === 'true' ? 'paid' : 'pending';
 
+  // Public price is 50 RUB. Keep the server amount aligned with the displayed price.
   const payload = {
     id: crypto.randomUUID(),
     status,
