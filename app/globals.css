@@ -82,3 +82,88 @@
   line-height:1; white-space:nowrap; letter-spacing:-.045em;
   -webkit-font-smoothing:antialiased;
 }
+
+/* V4.1 typography pass: the original JPG is untouched. Native browser text
+   replaces the raster lettering only in the central desktop composition. */
+@media (min-width:721px) {
+  .hero-heading {
+    position:absolute;
+    z-index:1;
+    top:19.4%;
+    left:50%;
+    width:48%;
+    height:20.6%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    background:radial-gradient(ellipse at center, #070b10 0%,rgba(7,11,16,.99) 52%,rgba(7,11,16,.94) 70%,rgba(7,11,16,0) 100%);
+  }
+  .hero-heading h1 {
+    margin:0;
+    color:#ffdfa3;
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:clamp(55px,6.6vw,113px);
+    font-weight:700;
+    line-height:.83;
+    letter-spacing:-.055em;
+    text-align:center;
+    text-rendering:optimizeLegibility;
+    font-kerning:normal;
+    text-shadow:0 2px 3px rgba(0,0,0,.25);
+  }
+  .hero-subheading {
+    position:absolute;
+    z-index:1;
+    top:39.4%;
+    left:50%;
+    transform:translateX(-50%);
+    width:41%;
+    height:6.4%;
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff8ec;
+    background:radial-gradient(ellipse at center,#070b10 0%,rgba(7,11,16,.98) 57%,rgba(7,11,16,0) 100%);
+    font-family:Montserrat,Arial,sans-serif;
+    font-size:clamp(11px,1.28vw,21px);
+    font-weight:700;
+    line-height:1.48;
+    letter-spacing:.22em;
+    text-align:center;
+    white-space:nowrap;
+    pointer-events:none;
+    text-rendering:optimizeLegibility;
+  }
+  .hero-live-price {
+    top:51.2%;
+    width:34%;
+    height:10.8%;
+  }
+  .hero-live-price span {
+    font-size:clamp(60px,7vw,116px);
+    text-shadow:0 2px 4px rgba(0,0,0,.25);
+    text-rendering:optimizeLegibility;
+  }
+  .truth-button {
+    z-index:3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    background:linear-gradient(180deg,#ffecbd 0%,#f8d58d 49%,#dba34b 100%);
+    border:1px solid rgba(255,233,176,.8);
+    box-shadow:0 8px 24px rgba(0,0,0,.43),inset 0 1px 1px rgba(255,255,255,.6);
+    color:#19120b;
+    font-size:clamp(12px,1.22vw,19px);
+    font-weight:800;
+    letter-spacing:.025em;
+    text-transform:uppercase;
+    text-rendering:optimizeLegibility;
+  }
+  .truth-button span,.truth-button b { opacity:1; }
+  .truth-button b { font-size:1.45em; font-weight:500; line-height:1; }
+  .truth-button:hover { box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.7); }
+}
