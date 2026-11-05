@@ -19,10 +19,10 @@ function safeCode(error) {
   return 'UNKNOWN_NETWORK_ERROR';
 }
 
-async function measure(task) {
+async function measure(task, fallbackCode = 'UNKNOWN_NETWORK_ERROR') {
   const started = performance.now();
   try { return { success: true, durationMs: Math.round(performance.now() - started), ...(await task()) }; }
-  catch (error) { return { success: false, durationMs: Math.round(performance.now() - started), errorCode: safeCode(error) }; }
+  catch (error) { const code = safeCode(error); return { success: false, durationMs: Math.round(performance.now() - started), errorCode: code === 'UNKNOWN_NETWORK_ERROR' ? fallbackCode : code }; }
 }
 
 function tlsCheck() {
@@ -42,11 +42,11 @@ export async function GET(request) {
   if (!expected || (supplied !== `Bearer ${expected}` && queryToken !== expected)) return new NextResponse(null, { status: 404 });
 
   const dnsResult = await measure(async () => { const result = await dns.lookup(HOST); return { resolved: Boolean(result.address), family: result.family }; });
-  const tlsResult = await measure(async () => tlsCheck());
+  const tlsResult = await measure(async () => tlsCheck(), 'TLS_HANDSHAKE_FAILED');
   const httpResult = await measure(async () => {
     const response = await fetch(`https://${HOST}/uapi/open-banking/v1.0/customers`, { cache: 'no-store', signal: AbortSignal.timeout(10000), redirect: 'manual' });
     return { httpStatus: response.status, reachable: true };
-  });
+  }, 'HTTPS_CONNECTION_FAILED');
 
   return NextResponse.json({ environment: 'preview', region: process.env.VERCEL_REGION || 'unknown', dns: dnsResult, tls: tlsResult, http: httpResult }, { headers: { 'Cache-Control': 'no-store' } });
 }
