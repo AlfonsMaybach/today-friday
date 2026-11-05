@@ -12,6 +12,8 @@ function safeCode(error) {
   let current = error;
   for (let depth = 0; current && depth < 6; depth += 1) {
     if (SAFE_CODES.has(current.code)) return current.code;
+    if (current.code === 'EPROTO' || String(current.code || '').startsWith('ERR_SSL_') || String(current.code || '').startsWith('ERR_TLS_')) return 'TLS_ERROR';
+    if (['EHOSTUNREACH', 'ENETUNREACH', 'ECONNABORTED'].includes(current.code)) return 'CONNECTION_ERROR';
     current = current.cause;
   }
   return 'UNKNOWN_NETWORK_ERROR';
