@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@500;600;700&display=swap');
 :root { color-scheme: dark; } * { box-sizing: border-box; } html,body { min-height:100%; margin:0; } body { background:#05080d; font-family:Montserrat,Arial,sans-serif; } button { font:inherit; }
 .experience { isolation:isolate; height:max(100svh,680px); min-height:max(100svh,680px); overflow:hidden; position:relative; background:#05080d; }
 .hero-stage { position:absolute; top:50%; left:50%; width:max(100%,150svh); aspect-ratio:3/2; z-index:0; transform:translate(-50%,-50%); animation:none; }
@@ -102,11 +102,11 @@
   .hero-heading h1 {
     margin:0;
     color:#ffdfa3;
-    font-family:Georgia,'Times New Roman',serif;
-    font-size:clamp(55px,6.6vw,136px);
-    font-weight:700;
-    line-height:.83;
-    letter-spacing:-.055em;
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:clamp(60px,7.1vw,144px);
+    font-weight:500;
+    line-height:.84;
+    letter-spacing:-.025em;
     text-align:center;
     text-rendering:optimizeLegibility;
     font-kerning:normal;
