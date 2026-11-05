@@ -36,7 +36,8 @@ export async function GET(request) {
   if (process.env.VERCEL_ENV !== 'preview' || process.env.PAYMENT_DIAGNOSTICS_ENABLED !== 'true') return new NextResponse(null, { status: 404 });
   const expected = process.env.TEMP_NETWORK_DIAGNOSTIC_TOKEN;
   const supplied = request.headers.get('authorization');
-  if (!expected || supplied !== `Bearer ${expected}`) return new NextResponse(null, { status: 404 });
+  const queryToken = new URL(request.url).searchParams.get('token');
+  if (!expected || (supplied !== `Bearer ${expected}` && queryToken !== expected)) return new NextResponse(null, { status: 404 });
 
   const dnsResult = await measure(async () => { const result = await dns.lookup(HOST); return { resolved: Boolean(result.address), family: result.family }; });
   const tlsResult = await measure(async () => tlsCheck());
