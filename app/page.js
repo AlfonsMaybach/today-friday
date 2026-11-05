@@ -198,7 +198,7 @@ export default function Home() {
     <>
     <main className={`experience desktop-experience phase-${phase}`}>
       <div className="hero-stage">
-        <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
+        <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" unoptimized />
         {phase === 'idle' && <><button className="truth-button" onClick={start}><span>Узнать правду</span><b aria-hidden="true">→</b></button>{emailOpen && <form className="email-form" onSubmit={start}><strong>К оплате сейчас: {paymentAmount} ₽</strong><label>Укажите email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /><button type="submit">Перейти к оплате</button></label><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}</>}
       </div>
       <div className="ambient-glow" aria-hidden="true" />
