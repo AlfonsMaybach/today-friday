@@ -10,6 +10,7 @@ export default function Home() {
   const [phase, setPhase] = useState('idle');
   const [status, setStatus] = useState('Готовы проверить календарную реальность.');
   const [progress, setProgress] = useState(0);
+  const [progressStage, setProgressStage] = useState('verification');
   const [result, setResult] = useState(null);
   const [email, setEmail] = useState('');
   const [emailOpen, setEmailOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function Home() {
     let cancelled = false;
     (async () => {
       try {
-        setPhase('processing'); setStatus('Проверяем подтверждение оплаты…'); setProgress(8);
+        setProgressStage('verification'); setPhase('processing'); setStatus('Проверяем подтверждение оплаты…'); setProgress(8);
         for (let attempt = 0; attempt < 30; attempt += 1) {
           if (!cancelled) setProgress(Math.min(92, 8 + (attempt * 3)));
           const payment = await api(`/api/payment-status?orderId=${encodeURIComponent(orderId)}`);
@@ -67,6 +68,7 @@ export default function Home() {
       fetch('/api/payment-config').then((response) => response.json()).then((config) => setPaymentAmount(config.actualAmount || 99)).catch(() => {});
       return;
     }
+    setProgressStage('preparation');
     setPhase('processing');
     setProgress(4);
     setResult(null);
@@ -75,7 +77,13 @@ export default function Home() {
       setStatus('Формируем защищённый запрос…');
       await advance(4, 18, 420);
       const payment = await api('/api/create-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-      if (payment.paymentUrl) { window.location.assign(payment.paymentUrl); return; }
+      if (payment.paymentUrl) {
+        setStatus('Платёж подготовлен. Переходим к оплате…');
+        await advance(18, 100, 720);
+        window.location.assign(payment.paymentUrl);
+        return;
+      }
+      setProgressStage('verification');
       setStatus('Проверяем подтверждение оплаты…');
       await advance(18, 46, 560);
 
@@ -106,6 +114,7 @@ export default function Home() {
   function reset() {
     setPhase('idle');
     setProgress(0);
+    setProgressStage('verification');
     setResult(null);
     setEmailOpen(false);
     setStatus('Готовы проверить календарную реальность.');
@@ -125,7 +134,7 @@ export default function Home() {
       <div className="grain" aria-hidden="true" />
       <section className="interaction" aria-live="polite">
         <h1 className="sr-only">Сегодня пятница?</h1>
-        {phase === 'processing' && <div className="status-card" role="status"><p>{status}</p><div className="progress-label"><span>ПРОВЕРКА</span><b>{progress}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>}
+        {phase === 'processing' && <div className="status-card" role="status"><p>{status}</p><div className="progress-label"><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>}
         {phase === 'error' && <div className="status-card status-error" role="alert"><p>{status}</p><button className="retry-button" onClick={reset}>Попробовать ещё раз</button></div>}
         {hasResult && <section className={`result-card ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="retry-button" onClick={reset}>Проверить ещё раз · 99 ₽</button></section>}
       </section>
@@ -139,7 +148,7 @@ export default function Home() {
       <header className="mobile-nav"><span>TODAY-FRIDAY</span><button type="button" aria-label="Открыть меню"><i /><i /><i /></button></header>
       <section className="mobile-content" aria-live="polite">
         {phase === 'idle' && <><h1>Сегодня<br />пятница?</h1><p>ПОЛУЧИ ТОЧНЫЙ ОТВЕТ<br />ВСЕГО ЗА</p><strong>99 ₽</strong>{emailOpen && <form className="mobile-email-form" onSubmit={start}><b>К оплате сейчас: {paymentAmount} ₽</b><label>Email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /></label><button type="submit">ПЕРЕЙТИ К ОПЛАТЕ</button><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}{!emailOpen && <button className="mobile-truth-button" onClick={start}>УЗНАТЬ ПРАВДУ <b aria-hidden="true">→</b></button>}<small>▣&nbsp; Безопасная оплата</small></>}
-        {phase === 'processing' && <div className="mobile-status" role="status"><p>{status}</p><div><span>ПРОВЕРКА</span><b>{progress}%</b></div><i><em style={{ width: `${progress}%` }} /></i></div>}
+        {phase === 'processing' && <div className="mobile-status" role="status"><p>{status}</p><div><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><i><em style={{ width: `${progress}%` }} /></i></div>}
         {phase === 'error' && <div className="mobile-status mobile-status-error" role="alert"><p>{status}</p><button className="mobile-retry" onClick={reset}>Попробовать ещё раз</button></div>}
         {hasResult && <><h1 className="mobile-result-heading">Сегодня<br />пятница?</h1><section className={`mobile-result ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="mobile-retry" onClick={reset}>Проверить ещё раз · 99 ₽</button></section></>}
       </section>
