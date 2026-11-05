@@ -2,7 +2,7 @@ import './globals.css';
 
 export const metadata = {
   title: 'Сегодня пятница?',
-  description: '99 ₽ за правду. Узнайте, сегодня пятница или нет.',
+  description: '50 ₽ за правду. Узнайте, сегодня пятница или нет.',
   icons: { icon: '/favicon.svg' }
 };
 
