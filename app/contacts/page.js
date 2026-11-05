@@ -8,7 +8,7 @@ export default function ContactsPage() {
     <h1>Контакты</h1>
     <h2>Оператор</h2>
     <p>ИП Евстигнеев Аким Евгеньевич<br />ИНН 503611244088</p>
-    <p>ОГРНИП: <span className="legal-placeholder">[УКАЗАТЬ]</span><br />Адрес: <span className="legal-placeholder">[УКАЗАТЬ]</span><br />Email: <span className="legal-placeholder">[УКАЗАТЬ EMAIL]</span><br />Телефон: <span className="legal-placeholder">[УКАЗАТЬ ПРИ НЕОБХОДИМОСТИ]</span></p>
+    <p>ОГРНИП: <span className="legal-placeholder">[УКАЗАТЬ]</span><br />Адрес: <span className="legal-placeholder">[УКАЗАТЬ]</span><br />Email: <span className="legal-placeholder">DoYouHaveDollars@mail.com</span><br />Телефон: <span className="legal-placeholder">[УКАЗАТЬ ПРИ НЕОБХОДИМОСТИ]</span></p>
     <h2>Поддержка</h2>
     <p>Порядок и срок ответа на обращения: <span className="legal-placeholder">[СОГЛАСОВАТЬ]</span>.</p>
   </article></main>;
