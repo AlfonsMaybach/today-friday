@@ -70,3 +70,51 @@ test('shared confirmation refuses malformed or mismatched bank operations', asyn
     assert.equal(marked, false);
   }
 });
+
+test('failed bank operation transitions only through guarded database update', async () => {
+  let args = null;
+  const result = await confirmTochkaOrder(storedOrder, {
+    getPayment: async () => ({ Data: { Operation: [{ ...bankOperation, status: 'DECLINED' }] } }),
+    markFailedIfMatches: async (input) => { args = input; return true; }
+  });
+  assert.equal(result.status, 'failed');
+  assert.deepEqual(args, { orderId: storedOrder.id, operationId: storedOrder.provider_operation_id });
+});
+
+test('concurrent paid confirmation is never reported as failed by a stale poll', async () => {
+  const result = await confirmTochkaOrder(storedOrder, {
+    getPayment: async () => ({ Data: { Operation: [{ ...bankOperation, status: 'DECLINED' }] } }),
+    markFailedIfMatches: async () => false,
+    getOrder: async () => ({ ...storedOrder, status: 'paid' })
+  });
+  assert.equal(result.status, 'paid');
+  assert.equal(result.reason, 'STATE_CHANGED');
+});
+
+test('failed update race without a paid transition stays pending', async () => {
+  const result = await confirmTochkaOrder(storedOrder, {
+    getPayment: async () => ({ Data: { Operation: [{ ...bankOperation, status: 'EXPIRED' }] } }),
+    markFailedIfMatches: async () => false,
+    getOrder: async () => ({ ...storedOrder, status: 'pending' })
+  });
+  assert.equal(result.status, 'pending');
+});
+
+test('concurrent successful confirmation returns paid if another poll won', async () => {
+  const result = await confirmTochkaOrder(storedOrder, {
+    getPayment: async () => ({ Data: { Operation: [bankOperation] } }),
+    markPaidIfMatches: async () => false,
+    getOrder: async () => ({ ...storedOrder, status: 'paid' })
+  });
+  assert.equal(result.status, 'paid');
+});
+
+test('mismatched failed operation cannot change database status', async () => {
+  let changed = false;
+  const result = await confirmTochkaOrder(storedOrder, {
+    getPayment: async () => ({ Data: { Operation: [{ ...bankOperation, operationId: 'other', status: 'DECLINED' }] } }),
+    markFailedIfMatches: async () => { changed = true; return true; }
+  });
+  assert.equal(result.status, 'pending');
+  assert.equal(changed, false);
+});
