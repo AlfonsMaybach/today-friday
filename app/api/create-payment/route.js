@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { createPaymentToken } from '../../../lib/payment-token';
+import { createPaymentToken, readPaymentToken } from '../../../lib/payment-token';
 import { checkoutConfiguration } from '../../../lib/checkout-configuration';
-import { createOrder, updateOrder, consumeRateLimit } from '../../../lib/db';
+import { createOrder, getOrder, updateOrder, consumeRateLimit } from '../../../lib/db';
 import { createPayment, discoverCustomerAndMerchant, TochkaApiError } from '../../../lib/tochka';
 import { diagnosticsEnabled, createDiagnostics, startStage, safeDiagnosticError, markProviderFailure } from '../../../lib/payment-diagnostics';
 
@@ -33,6 +33,21 @@ export async function POST(request) {
   const provider = process.env.PAYMENT_PROVIDER || 'stub';
 
   if (provider === 'tochka') {
+    // Reuse the current browser's unresolved checkout instead of creating a second bank operation.
+    const existingToken = request.cookies.get('tf_order_access')?.value;
+    if (existingToken) {
+      let existingAccess = null;
+      try { existingAccess = readPaymentToken(existingToken); } catch { /* Expired or invalid cookie: new checkout allowed. */ }
+      if (existingAccess?.type === 'order-access') {
+        const existing = await getOrder(existingAccess.id);
+        if (existing && ['created', 'pending'].includes(existing.status)) {
+          if (existing.payment_url && existing.provider_operation_id) {
+            return setRateCookie(NextResponse.json({ provider: 'tochka', orderId: existing.id, status: 'pending', actualAmount: existing.amount_kopecks / 100, displayAmount: existing.display_amount_kopecks / 100, paymentUrl: existing.payment_url, reused: true }));
+          }
+          return setRateCookie(NextResponse.json({ error: 'Предыдущий запрос в банк ещё не разрешён. Повторный платёж заблокирован во избежание двойного списания.', orderId: existing.id, status: 'pending', retryable: false }, { status: 409 }));
+        }
+      }
+    }
     const id = crypto.randomUUID();
     const { amountKopecks, displayAmountKopecks } = checkoutConfig;
     const paymentLinkId = `tf-${id}`;
@@ -68,6 +83,7 @@ export async function POST(request) {
       if (diagnostics) { diagnostics.providerRequestId = requestId; markProviderFailure(diagnostics, error); }
       await updateOrder(id, { status: providerCallStarted ? 'pending' : 'failed' });
       const response = NextResponse.json({ error: 'Не удалось создать платёж.', requestId: requestId || id.slice(0, 8), ...(diagnostics ? { diagnostics } : {}) }, { status: 502 });
+      if (providerCallStarted) response.cookies.set('tf_order_access', accessToken, { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 3600, path: '/' });
       return setRateCookie(response);
     }
   }
