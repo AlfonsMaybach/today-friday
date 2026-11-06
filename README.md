@@ -1,6 +1,6 @@
 # today-friday — Vercel edition
 
-«Сегодня пятница?» — 99 ₽ за правду.
+«Сегодня пятница?» — 50 ₽ за правду.
 
 ## Что это
 Версия проекта, переделанная с PHP/MySQL под Next.js + Vercel Serverless.
@@ -32,7 +32,7 @@ npm run dev
 4. Добавьте Environment Variables:
    - `PAYMENT_PROVIDER=stub`
    - `PAYMENT_TEST_MODE=true` только для тестового окружения
-   - `PAYMENT_AMOUNT=99`
+   - `PAYMENT_AMOUNT=50`
    - `PAYMENT_CURRENCY=RUB`
    - `APP_TIMEZONE=Europe/Moscow`
    - `PAYMENT_WEBHOOK_SECRET` — длинное случайное значение, заданное как Vercel Secret
