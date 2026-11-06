@@ -15,7 +15,10 @@ export async function GET(request) {
     const rateKey = request.cookies.get('tf_rate_key')?.value || 'anonymous';
     if (!await consumeRateLimit(`status:${rateKey}`, 60, 300)) return NextResponse.json({ error: 'Слишком много запросов.' }, { status: 429 });
     if ((process.env.PAYMENT_PROVIDER || 'stub') === 'tochka' && orderId) {
-      const access = readPaymentToken(accessToken);
+      if (!accessToken) return NextResponse.json({ error: 'Недействительный доступ к заказу.' }, { status: 403 });
+      let access;
+      try { access = readPaymentToken(accessToken); }
+      catch { return NextResponse.json({ error: 'Недействительный доступ к заказу.' }, { status: 403 }); }
       if (access.type !== 'order-access' || access.id !== orderId) return NextResponse.json({ error: 'Недействительный доступ к заказу.' }, { status: 403 });
       const order = await getOrder(orderId);
       if (!order) return NextResponse.json({ error: 'Заказ не найден.' }, { status: 404 });
