@@ -1,0 +1,29 @@
+name: Payment regression tests
+on:
+  push:
+    branches:
+      - codex/restore-v41-preview
+    paths:
+      - 'lib/**'
+      - 'tests/**'
+      - 'app/api/**'
+      - '.github/workflows/payment-tests.yml'
+  workflow_dispatch:
+jobs:
+  payment-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          PAYMENT_PROVIDER: stub
+          PAYMENT_TEST_MODE: 'true'
+          PAYMENT_WEBHOOK_SECRET: ci-only-test-secret-not-used-in-production
