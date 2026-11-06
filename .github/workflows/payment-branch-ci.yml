@@ -1,0 +1,28 @@
+name: Today Friday payment branch CI
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/payment-branch-ci.yml']
+  workflow_dispatch:
+jobs:
+  payment-branch-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout isolated payment development branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/restore-v41-preview
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          PAYMENT_PROVIDER: stub
+          PAYMENT_TEST_MODE: 'true'
+          PAYMENT_WEBHOOK_SECRET: ci-only-not-a-production-secret
