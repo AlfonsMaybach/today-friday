@@ -1,0 +1,46 @@
+/* V5 approved art. Never replace the approved image with stock imagery.
+   The 30% reduction was applied only to the original footer feature crops. */
+.v5-approved { position:relative; display:flex; justify-content:center; align-items:center; min-height:100svh; overflow:hidden; background:#06111d; }
+.v5-approved-frame { position:relative; width:100%; height:100svh; min-height:560px; overflow:hidden; }
+.v5-approved-desktop { position:absolute; inset:0; }
+.v5-approved-art { display:block; width:100%; height:100%; object-fit:fill; }
+.v5-art-start { position:absolute; left:30.5%; top:60.6%; width:39.4%; height:12.5%; border:0; border-radius:999px; background:transparent; cursor:pointer; }
+.v5-art-start:hover { box-shadow:inset 0 0 0 3px rgba(255,255,255,.35); }
+.v5-art-start:focus-visible,.v5-art-legal a:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+.v5-art-legal { position:absolute; inset:0; pointer-events:none; }
+.v5-art-legal a { position:absolute; top:90.6%; height:6%; pointer-events:auto; display:block; }
+.v5-art-legal a:nth-child(1) { left:71.6%; width:12%; }
+.v5-art-legal a:nth-child(2) { left:84.2%; width:6.5%; }
+.v5-art-legal a:nth-child(3) { left:90.9%; width:7.5%; }
+.v5-approved-desktop-status { position:absolute; inset:0; z-index:4; display:flex; align-items:center; justify-content:center; background:rgba(0,8,18,.75); backdrop-filter:blur(5px); }
+.v5-approved-desktop-status .v5-status { margin:0; }
+.v5-approved-result-art { position:absolute; inset:0; background-image:url('/v5-approved-states.png'); background-repeat:no-repeat; background-size:200% 220%; background-position:left top; }
+.v5-no-art { background-position:right top; }
+.v5-approved-retry { position:absolute; z-index:2; bottom:9%; left:50%; transform:translateX(-50%); padding:9px 17px; border:1px solid #e9bc68; border-radius:999px; background:rgba(4,12,22,.88); color:#f7da9d; font:12px Arial,sans-serif; cursor:pointer; }
+.v5-approved-retry:hover { background:rgba(20,35,49,.95); }
+.v5-approved-result-art .v5-art-legal a:nth-child(1) { left:70.2%; width:12%; }
+.v5-approved-result-art .v5-art-legal a:nth-child(2) { left:83.5%; width:7%; }
+.v5-approved-result-art .v5-art-legal a:nth-child(3) { left:91.1%; width:7%; }
+.v5-approved-mobile { display:none; }
+@media(max-width:700px) {
+  .v5-approved { min-height:100svh; overflow:visible; }
+  .v5-approved-frame { min-height:100svh; height:auto; overflow:visible; }
+  .v5-approved-desktop,.v5-approved-desktop-status { display:none; }
+  .v5-approved-mobile { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; min-height:100svh; padding:clamp(55px,11vh,110px) 15px 22px; background-image:linear-gradient(180deg,rgba(3,12,25,.45),rgba(4,15,28,.70) 65%,rgba(2,9,18,.85)),url('/v5-approved-landing.png'); background-size:cover,auto 100%; background-position:center,left center; }
+  .v5-approved-mobile .v5-heading { font-size:clamp(52px,12vw,72px); line-height:1.05; text-shadow:0 2px 12px #020814; }
+  .v5-approved-mobile .v5-subheading { margin-top:28px; font-size:clamp(21px,5.4vw,28px); }
+  .v5-approved-mobile .v5-prices { margin:38px 0 32px; }
+  .v5-approved-mobile .v5-features { margin-top:auto; padding-top:35px; }
+  .v5-approved-mobile .v5-features svg { width:17px; height:17px; }
+  .v5-approved-mobile .v5-features strong { font-size:8px; }
+  .v5-approved-mobile .v5-features span { font-size:9px; }
+  .v5-approved-mobile .v5-legal { margin-top:23px; font-size:10px; }
+  .v5-approved-result-art { position:relative; min-height:100svh; background-image:linear-gradient(180deg,rgba(3,12,25,.45),rgba(3,12,25,.72)),url('/v5-approved-landing.png'); background-size:cover,auto 100%; background-position:center,left center; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .v5-approved-result-art:before { content:'ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ'; display:block; margin-bottom:16px; color:#ffdf91; letter-spacing:.15em; font:700 12px Arial,sans-serif; }
+  .v5-approved-result-art:after { content:'ДА!'; display:block; width:80%; padding:40px 12px 70px; text-align:center; border:2px solid #e6b15c; border-radius:25px; background:rgba(4,12,21,.95); box-shadow:0 0 22px rgba(255,191,69,.3); color:#ffe39b; font:italic 100px Georgia,serif; }
+  .v5-no-art:after { content:'НЕТ!'; font-size:88px; }
+  .v5-approved-result-art .v5-approved-retry { bottom:23%; z-index:3; }
+  .v5-approved-result-art .v5-art-legal { display:none; }
+  .v5-approved .v5-qr-frame { display:grid; }
+  .v5-approved .v5-qr-note { display:block; }
+}
