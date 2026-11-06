@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths: ['.github/workflows/payment-branch-ci.yml']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 jobs:
   payment-branch-tests:
