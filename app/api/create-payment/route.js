@@ -86,7 +86,7 @@ export async function POST(request) {
   const payload = {
     id: crypto.randomUUID(),
     status,
-    amount: Number(process.env.PAYMENT_AMOUNT || 99),
+    amount: Number(process.env.PAYMENT_AMOUNT || 50),
     currency: process.env.PAYMENT_CURRENCY || 'RUB',
     createdAt,
     expiresAt: createdAt + 15 * 60 * 1000
@@ -98,6 +98,6 @@ export async function POST(request) {
     amount: payload.amount,
     currency: payload.currency,
     paymentUrl: null,
-    displayAmount: 99
+    displayAmount: 50
   }));
 }
