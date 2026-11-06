@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import qrcode from 'qrcode-generator';
 import { useEffect, useRef, useState } from 'react';
 import DiagnosticPanel from './components/DiagnosticPanel';
+import './v5.css';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -12,6 +12,19 @@ function paymentQrDataUrl(paymentUrl) {
   qr.addData(paymentUrl);
   qr.make();
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qr.createSvgTag({ cellSize: 5, margin: 4 }))}`;
+}
+
+function FeatureIcon({ name }) {
+  if (name === 'shield') return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 5v6c0 5.4-3.4 8.8-8 11-4.6-2.2-8-5.6-8-11V5l8-3Z" /></svg>;
+  if (name === 'card') return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20M6 15h4" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13 2-9 12h7l-1 8 10-13h-7l1-7Z" /></svg>;
+}
+function Features() {
+  return <section className="v5-features" aria-label="Преимущества">
+    <article><FeatureIcon name="shield" /><strong>100% ТОЧНОСТЬ</strong><span>Проверяем<br />по реальному времени</span></article>
+    <article><FeatureIcon name="card" /><strong>БЕЗОПАСНАЯ ОПЛАТА</strong><span>Платежи защищены</span></article>
+    <article><FeatureIcon name="flash" /><strong>МОМЕНТАЛЬНЫЙ ОТВЕТ</strong><span>Сразу после оплаты</span></article>
+  </section>;
 }
 
 export default function Home() {
@@ -195,39 +208,70 @@ export default function Home() {
   const hasResult = phase === 'friday' || phase === 'not-friday';
 
   return (
-    <>
-    <main className={`experience desktop-experience phase-${phase}`}>
-      <div className="hero-stage">
-        <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" unoptimized />
-        {phase === 'idle' && <div className="hero-live-price" aria-label={`Старая цена 99 рублей, новая цена ${paymentAmount} рублей`}><span className="price-was" aria-hidden="true" /><span className="price-now" aria-hidden="true">{paymentAmount} ₽</span></div>}
-        {phase === 'idle' && <><button className="truth-button" onClick={start}><span>Узнать правду</span><b aria-hidden="true">→</b></button>{emailOpen && <form className="email-form" onSubmit={start}><strong>К оплате сейчас: {paymentAmount} ₽</strong><label>Укажите email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /><button type="submit">Перейти к оплате</button></label><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}</>}
+    <main className={`v5-shell v5-phase-${phase}`}>
+      <div className="v5-scene" aria-hidden="true" />
+      <div className="v5-vignette" aria-hidden="true" />
+      <div className="v5-layout">
+        <section className="v5-content" aria-live="polite">
+          <h1 className="v5-heading">Сегодня<br /><em>пятница?</em></h1>
+          {phase === 'idle' && <>
+            <p className="v5-subheading">Узнай прямо сейчас<br />и получи ответ за {paymentAmount} рублей</p>
+            <div className="v5-prices" aria-label={`Скидка: раньше 99 рублей, сейчас ${paymentAmount} рублей`}>
+              <del className="v5-old-price" aria-hidden="true">99 ₽</del>
+              <strong className="v5-new-price" aria-hidden="true">{paymentAmount} ₽</strong>
+            </div>
+            <button className="v5-gold-button" type="button" onClick={start}>Узнать сейчас</button>
+          </>}
+          {phase === 'processing' && <section className="v5-status" role="status">
+            <span className="v5-kicker">{progressStage === 'payment' ? 'ОЖИДАНИЕ ОПЛАТЫ' : 'ПРОВЕРКА'}</span>
+            <p>{status}</p>
+            <div className="v5-progress"><i style={{ width: `${progress}%` }} /></div>
+            <small>{progressStage === 'payment' ? 'Результат появится после подтверждения банка' : `${progress}%`}</small>
+            {checkout && !checkoutOpen && <button type="button" className="v5-secondary-button" onClick={() => setCheckoutOpen(true)}>Показать QR-код</button>}
+          </section>}
+          {phase === 'error' && <section className="v5-status v5-error" role="alert">
+            <span className="v5-kicker">НЕ УДАЛОСЬ ЗАВЕРШИТЬ</span><p>{status}</p>
+            <button type="button" className="v5-secondary-button" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button>
+          </section>}
+          {hasResult && <section className="v5-result" aria-label="Результат проверки">
+            <span className="v5-kicker">ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</span>
+            <h2>{result?.isFriday ? 'ДА!' : 'НЕТ!'}</h2>
+            <p>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня не пятница.'}</p>
+            <button className="v5-secondary-button" type="button" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button>
+          </section>}
+        </section>
+        <Features />
+        <nav className="v5-legal" aria-label="Юридическая информация">
+          <a href="/privacy">Политика конфиденциальности</a><span aria-hidden="true">|</span>
+          <a href="/offer">Оферта</a><span aria-hidden="true">|</span>
+          <a href="/contacts">Контакты</a>
+        </nav>
       </div>
-      <div className="ambient-glow" aria-hidden="true" />
-      <div className="grain" aria-hidden="true" />
-      <section className="interaction" aria-live="polite">
-        {phase === 'processing' && <div className="status-card" role="status"><p>{status}</p>{checkout && !checkoutOpen && <button className="retry-button" type="button" onClick={() => setCheckoutOpen(true)}>Показать QR-код</button>}<div className="progress-label"><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : progressStage === 'payment' ? 'ОПЛАТА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>}
-        {phase === 'error' && <div className="status-card status-error" role="alert"><p>{status}</p><button className="retry-button" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button></div>}
-        {hasResult && <section className={`result-card ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="retry-button" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button></section>}
-      </section>
-      {phase === 'friday' && <div className="celebration" aria-hidden="true" />}
+      {emailOpen && phase === 'idle' && <div className="v5-overlay" role="presentation">
+        <form className="v5-modal v5-email-modal" onSubmit={start} aria-label="Электронный чек">
+          <button className="v5-close" type="button" onClick={() => setEmailOpen(false)} aria-label="Закрыть">×</button>
+          <span className="v5-kicker">TODAY FRIDAY · ЭЛЕКТРОННЫЙ ЧЕК</span>
+          <h2>Почти готово</h2>
+          <p>Укажите email, на который придёт электронный чек.</p>
+          <label htmlFor="v5-email">Электронная почта</label>
+          <input id="v5-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" autoFocus required placeholder="you@example.com" />
+          <button className="v5-gold-button v5-modal-button" type="submit">Перейти к оплате · {paymentAmount} ₽</button>
+          <small>Email используется для оформления чека. <a href="/privacy">Политика конфиденциальности</a>.</small>
+        </form>
+      </div>}
+      {checkout && checkoutOpen && <div className="v5-overlay" role="presentation">
+        <section className="v5-modal v5-qr-modal" role="dialog" aria-modal="true" aria-label="Оплата через Точку">
+          <button className="v5-close" type="button" onClick={() => setCheckoutOpen(false)} aria-label="Свернуть оплату">×</button>
+          <span className="v5-kicker">TODAY FRIDAY · БЕЗОПАСНАЯ ОПЛАТА</span>
+          <h2>Оплата <strong>{checkout.amount} ₽</strong></h2>
+          <p>Сканируйте QR-код камерой телефона, чтобы открыть страницу оплаты Точки.</p>
+          <div className="v5-qr-frame"><img src={checkout.qrSrc} alt="QR-код ссылки на страницу оплаты Точки" width="230" height="230" /></div>
+          <p className="v5-qr-note">QR ведёт на защищённую страницу Точки. Это не прямой код СБП.</p>
+          <a className="v5-gold-button v5-modal-button" href={checkout.paymentUrl} target="_blank" rel="noopener noreferrer">Открыть оплату в Точке</a>
+          <small>После подтверждения оплаты результат появится здесь автоматически.</small>
+        </section>
+      </div>}
       <DiagnosticPanel report={diagnosticReport} onClose={() => setDiagnosticReport(null)} />
-      <footer className="desktop-footer"><span>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</span><nav aria-label="Юридическая информация"><a href="/privacy">Политика</a><a href="/offer">Оферта</a><a href="/contacts">Контакты</a></nav></footer>
     </main>
-    <main className={`mobile-experience phase-${phase}`}>
-      <Image className="mobile-art" src="/city-storm-v41-mobile.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
-      <div className="mobile-vignette" aria-hidden="true" />
-      <header className="mobile-nav"><span>TODAY-FRIDAY</span><button type="button" aria-label="Открыть меню"><i /><i /><i /></button></header>
-      <section className="mobile-content" aria-live="polite">
-        {phase === 'idle' && <><h1>Сегодня<br />пятница?</h1><p>ПОЛУЧИ ТОЧНЫЙ ОТВЕТ<br />ВСЕГО ЗА</p><strong aria-label={`Старая цена 99 рублей, новая цена ${paymentAmount} рублей`}><del className="mobile-old-price" aria-hidden="true">99 ₽</del><span className="mobile-new-price" aria-hidden="true">{paymentAmount} ₽</span></strong>{emailOpen && <form className="mobile-email-form" onSubmit={start}><b>К оплате сейчас: {paymentAmount} ₽</b><label>Email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /></label><button type="submit">ПЕРЕЙТИ К ОПЛАТЕ</button><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}{!emailOpen && <button className="mobile-truth-button" onClick={start}>УЗНАТЬ ПРАВДУ <b aria-hidden="true">→</b></button>}<small>▣&nbsp; Безопасная оплата</small></>}
-        {phase === 'processing' && <div className="mobile-status" role="status"><p>{status}</p>{checkout && !checkoutOpen && <button className="mobile-retry" type="button" onClick={() => setCheckoutOpen(true)}>Показать оплату</button>}<div><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : progressStage === 'payment' ? 'ОПЛАТА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><i><em style={{ width: `${progress}%` }} /></i></div>}
-        {phase === 'error' && <div className="mobile-status mobile-status-error" role="alert"><p>{status}</p><button className="mobile-retry" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button></div>}
-        {hasResult && <><h1 className="mobile-result-heading">Сегодня<br />пятница?</h1><section className={`mobile-result ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="mobile-retry" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button></section></>}
-      </section>
-      {phase === 'idle' && <section className="mobile-benefits" aria-label="Преимущества"><article><b>◌</b><span><strong>100% ТОЧНОСТЬ</strong><small>Проверяем по реальному времени</small></span></article><article><b>▣</b><span><strong>БЕЗОПАСНАЯ ОПЛАТА</strong><small>Платежи защищены</small></span></article><article><b>ϟ</b><span><strong>МОМЕНТАЛЬНЫЙ ОТВЕТ</strong><small>Сразу после оплаты</small></span></article></section>}
-      <footer className="mobile-footer"><span>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</span><nav aria-label="Юридическая информация"><a href="/privacy">Политика</a><a href="/offer">Оферта</a><a href="/contacts">Контакты</a></nav></footer>
-      {phase === 'friday' && <div className="celebration" aria-hidden="true" />}
-    </main>
-      {checkout && checkoutOpen && <div className="checkout-overlay" role="presentation"><section className="checkout-modal" role="dialog" aria-modal="true" aria-label="Оплата через Точку"><button className="checkout-close" type="button" onClick={() => setCheckoutOpen(false)} aria-label="Свернуть окно оплаты">×</button><span className="checkout-eyebrow">TODAY FRIDAY · ОПЛАТА</span><h2>{checkout.amount} ₽</h2><p className="checkout-lead">Сканируйте код телефоном, чтобы открыть защищённую страницу оплаты Точки.</p><div className="checkout-qr"><img src={checkout.qrSrc} alt="QR-код для открытия страницы оплаты Точки на телефоне" width="216" height="216" /></div><p className="checkout-caption">Это QR-ссылка на страницу Точки, не прямой QR СБП. Оплата и чек оформляются банком.</p><a className="checkout-action" href={checkout.paymentUrl}>Открыть оплату в Точке ↗</a><p className="checkout-wait">После оплаты результат появится здесь автоматически.</p></section></div>}
-    </>
   );
 }
