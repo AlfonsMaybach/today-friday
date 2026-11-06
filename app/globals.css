@@ -97,9 +97,38 @@
     align-items:center;
     justify-content:center;
     pointer-events:none;
-    background:radial-gradient(ellipse 39% 43% at center,#070b10 0%,rgba(7,11,16,.99) 78%,rgba(7,11,16,.84) 88%,rgba(7,11,16,0) 100%);
+    background:none;
+    isolation:isolate;
+  }
+  /* Two tightly fitted, fully opaque letter masks. Unlike a single enlarged
+     black oval, they cover the baked-in title line by line without changing
+     the visible silhouette of the surrounding storm. */
+  .hero-heading::before,
+  .hero-heading::after {
+    content:"";
+    position:absolute;
+    z-index:0;
+    pointer-events:none;
+    background:radial-gradient(ellipse 59% 61% at center,
+      #070b10 0%,#070b10 89%,
+      rgba(7,11,16,.92) 93%,
+      rgba(7,11,16,0) 100%);
+  }
+  .hero-heading::before {
+    left:20%;
+    top:10%;
+    width:60%;
+    height:42%;
+  }
+  .hero-heading::after {
+    left:16%;
+    top:37%;
+    width:70%;
+    height:50%;
   }
   .hero-heading h1 {
+    position:relative;
+    z-index:1;
     margin:0;
     color:#ffdfa3;
     font-family:'Cormorant Garamond',Georgia,serif;
@@ -125,7 +154,7 @@
     align-items:center;
     justify-content:center;
     color:#fff8ec;
-    background:radial-gradient(ellipse 55% 70% at center,#070b10 0%,rgba(7,11,16,.99) 82%,rgba(7,11,16,0) 100%);
+    background:radial-gradient(ellipse 56% 78% at center,#070b10 0%,#070b10 87%,rgba(7,11,16,.92) 92%,rgba(7,11,16,0) 100%);
     font-family:Montserrat,Arial,sans-serif;
     font-size:clamp(11px,1.28vw,21px);
     font-weight:700;
