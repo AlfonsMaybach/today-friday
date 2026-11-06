@@ -12,7 +12,7 @@ test('rejects ambiguous duplicated operations', () => {
   assert.equal(selectPaymentLinkCandidate([candidate, { ...candidate, operationId: 'op-2' }], order), null);
 });
 test('rejects mismatched merchant, link, amount and currency', () => {
-  for (const patch of [{ merchantId: 'other' }, { paymentLinkId: 'other' }, { amount: 1 }, { currency: 'EUR' }, { operationId: null }]) {
+  for (const patch of [{ merchantId: 'other' }, { paymentLinkId: 'other' }, { amount: 1 }, { currency: 'EUR' }, { currency: undefined }, { operationId: null }]) {
     assert.equal(selectPaymentLinkCandidate([{ ...candidate, ...patch }], order), null);
   }
 });
