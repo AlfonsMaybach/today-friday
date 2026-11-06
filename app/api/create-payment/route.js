@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { createPaymentToken } from '../../../lib/payment-token';
+import { checkoutConfiguration } from '../../../lib/checkout-configuration';
 import { createOrder, updateOrder, consumeRateLimit } from '../../../lib/db';
 import { createPayment, discoverCustomerAndMerchant, TochkaApiError } from '../../../lib/tochka';
 import { diagnosticsEnabled, createDiagnostics, startStage, safeDiagnosticError, markProviderFailure } from '../../../lib/payment-diagnostics';
@@ -9,6 +10,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
+  const checkoutConfig = checkoutConfiguration();
+  if (!checkoutConfig.ready) {
+    console.error('production_checkout_not_configured');
+    return NextResponse.json({ error: 'Оплата временно недоступна.' }, { status: 503 });
+  }
   const diagnostics = diagnosticsEnabled() ? createDiagnostics() : null;
   const stage = (name) => diagnostics ? startStage(diagnostics, name) : null;
   const finish = (handle, details) => handle?.finish(details);
@@ -28,8 +34,7 @@ export async function POST(request) {
 
   if (provider === 'tochka') {
     const id = crypto.randomUUID();
-    const amountKopecks = Number(process.env.PAYMENT_AMOUNT_KOPECKS || 100);
-    const displayAmountKopecks = Number(process.env.PAYMENT_DISPLAY_AMOUNT_KOPECKS || 5000);
+    const { amountKopecks, displayAmountKopecks } = checkoutConfig;
     const paymentLinkId = `tf-${id}`;
     const accessToken = createPaymentToken({ id, type: 'order-access', createdAt: Date.now(), expiresAt: Date.now() + 60 * 60 * 1000 });
     const orderStage = stage('Создание заказа в Neon');
