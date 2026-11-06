@@ -1,143 +1,233 @@
 'use client';
 
+import Image from 'next/image';
+import qrcode from 'qrcode-generator';
 import { useEffect, useRef, useState } from 'react';
+import DiagnosticPanel from './components/DiagnosticPanel';
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function paymentQrDataUrl(paymentUrl) {
+  const qr = qrcode(0, 'M');
+  qr.addData(paymentUrl);
+  qr.make();
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qr.createSvgTag({ cellSize: 5, margin: 4 }))}`;
+}
 
 export default function Home() {
-  const [phase,setPhase] = useState('idle');
-  const [status,setStatus] = useState('Готовы проверить календарную реальность.');
-  const [progress,setProgress] = useState(0);
-  const [result,setResult] = useState(null);
-  const [sound,setSound] = useState(true);
-  const [confetti,setConfetti] = useState([]);
-  const audioRef = useRef(null);
+  const [phase, setPhase] = useState('idle');
+  const [status, setStatus] = useState('Готовы проверить календарную реальность.');
+  const [progress, setProgress] = useState(0);
+  const [progressStage, setProgressStage] = useState('verification');
+  const [result, setResult] = useState(null);
+  const [email, setEmail] = useState('');
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(50);
+  const [checkout, setCheckout] = useState(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [diagnosticReport, setDiagnosticReport] = useState(null);
+  const timerRef = useRef(null);
 
-  useEffect(()=>()=>audioRef.current?.close?.(),[]);
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+  useEffect(() => {
+    fetch('/api/payment-config').then((response) => response.json()).then((config) => {
+      if (Number.isFinite(config.actualAmount) && config.actualAmount > 0) setPaymentAmount(config.actualAmount);
+    }).catch(() => {});
+  }, []);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const orderId = query.get('payment');
+    if (!orderId || orderId === 'failed') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setProgressStage('verification'); setPhase('processing'); setStatus('Проверяем подтверждение оплаты…'); setProgress(8);
+        for (let attempt = 0; attempt < 30; attempt += 1) {
+          if (!cancelled) setProgress(Math.min(92, 8 + (attempt * 3)));
+          const payment = await api(`/api/payment-status?orderId=${encodeURIComponent(orderId)}`);
+          if (payment.status === 'paid') {
+            if (!cancelled) setProgress(96);
+            const answer = await api(`/api/result?orderId=${encodeURIComponent(orderId)}`);
+            if (!cancelled) { setProgress(100); setResult(answer); setPhase(answer.isFriday ? 'friday' : 'not-friday'); }
+            return;
+          }
+          if (payment.status === 'failed') throw new Error('Платёж не подтверждён.');
+          await sleep(2000);
+        }
+        throw new Error('Платёж пока не подтверждён.');
+      } catch (error) { if (!cancelled) { setStatus(error.message === 'Платёж не найден.' ? 'Доступ к заказу на этом устройстве отсутствует. Если вы сканировали QR с телефона, результат появится на устройстве, где начинали оплату.' : error.message); setPhase('error'); } }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // The original order stays bound to the httpOnly cookie while QR checkout is open.
+  // Poll only our server; never treat a QR scan or a browser redirect as proof of payment.
+  useEffect(() => {
+    if (!checkout?.orderId || phase !== 'processing') return;
+    let active = true;
+    let timer;
+    let attempts = 0;
+    const poll = async () => {
+      if (!active) return;
+      try {
+        const payment = await api(`/api/payment-status?orderId=${encodeURIComponent(checkout.orderId)}`);
+        if (payment.status === 'paid') {
+          const answer = await api(`/api/result?orderId=${encodeURIComponent(checkout.orderId)}`);
+          if (active) {
+            setCheckoutOpen(false);
+            setProgressStage('verification');
+            setProgress(100);
+            setResult(answer);
+            setPhase(answer.isFriday ? 'friday' : 'not-friday');
+          }
+          return;
+        }
+        if (payment.status === 'failed') {
+          if (active) {
+            setCheckoutOpen(false);
+            setCheckout(null);
+            setStatus('Банк не подтвердил платёж. Можно попробовать ещё раз.');
+            setPhase('error');
+          }
+          return;
+        }
+      } catch {
+        // Network hiccups should not create a new payment or discard the existing order.
+      }
+      attempts += 1;
+      if (attempts >= 120) {
+        if (active) {
+          setCheckoutOpen(false);
+          setStatus('Платёж пока не подтверждён. Нажмите «Проверить оплату» для повторной проверки.');
+          setPhase('error');
+        }
+        return;
+      }
+      timer = setTimeout(poll, 2000);
+    };
+    poll();
+    return () => { active = false; clearTimeout(timer); };
+  }, [checkout?.orderId, phase]);
 
   async function api(url, options) {
-    const r = await fetch(url, options);
-    const data = await r.json().catch(()=>({}));
-    if (!r.ok) throw new Error(data.error || 'Ошибка сервера');
+    const response = await fetch(url, options);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) { const error = new Error(data.error || 'Не удалось получить ответ сервера.'); error.diagnostics = data.diagnostics; throw error; }
     return data;
   }
 
-  async function advance(from,to,ms) {
-    const n=18;
-    for(let i=1;i<=n;i++){ setProgress(Math.round(from+(to-from)*i/n)); await sleep(ms/n); }
+  async function advance(from, to, duration) {
+    const steps = 18;
+    for (let step = 1; step <= steps; step += 1) {
+      setProgress(Math.round(from + ((to - from) * step) / steps));
+      await sleep(duration / steps);
+    }
   }
 
-  async function start() {
-    setPhase('processing'); setProgress(4); setResult(null);
+  async function start(event) {
+    event?.preventDefault();
+    if (phase === 'processing') return;
+    if (!emailOpen) {
+      setEmailOpen(true);
+      fetch('/api/payment-config').then((response) => response.json()).then((config) => setPaymentAmount(config.actualAmount || 50)).catch(() => {});
+      return;
+    }
+    setProgressStage('preparation');
+    setPhase('processing');
+    setProgress(4);
+    setResult(null);
+
     try {
-      setStatus('Формируем защищённый запрос…'); await advance(4,18,450);
-      const payment = await api('/api/create-payment',{method:'POST'});
-      setStatus('Проверяем подтверждение оплаты…'); await advance(18,40,600);
-      let paid = payment.status === 'paid';
-      for(let i=0;!paid && i<30;i++){
-        await sleep(2000);
-        const p=await api('/api/payment-status?token='+encodeURIComponent(payment.token));
-        paid=p.status==='paid';
+      setStatus('Формируем защищённый запрос…');
+      await advance(4, 18, 420);
+      const payment = await api('/api/create-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+      if (payment.paymentUrl) {
+        setStatus('Платёж подготовлен. Открываем варианты оплаты…');
+        await advance(18, 100, 720);
+        const url = new URL(payment.paymentUrl);
+        if (url.protocol !== 'https:') throw new Error('Недопустимая ссылка на оплату.');
+        setCheckout({ orderId: payment.orderId, paymentUrl: url.href, qrSrc: paymentQrDataUrl(url.href), amount: payment.actualAmount });
+        setCheckoutOpen(true);
+        setProgressStage('payment');
+        setStatus('Ожидаем подтверждения оплаты от банка…');
+        return;
       }
-      if(!paid) throw new Error('Платёж пока не подтверждён.');
-      setStatus('Синхронизируемся с календарной реальностью…'); await advance(40,68,800);
-      setStatus('Определяем текущий день недели…'); await advance(68,92,850);
-      const answer=await api('/api/result?token='+encodeURIComponent(payment.token));
-      setStatus('Истина установлена.'); await advance(92,100,400);
-      setPhase('reveal'); await sleep(1000);
-      setResult(answer); setPhase(answer.isFriday?'friday':'no');
-      if(answer.isFriday) celebrate();
-    } catch(e) { setStatus(e.message); setPhase('error'); }
+      setProgressStage('verification');
+      setStatus('Проверяем подтверждение оплаты…');
+      await advance(18, 46, 560);
+
+      let paid = payment.status === 'paid';
+      for (let attempt = 0; !paid && attempt < 12; attempt += 1) {
+        await sleep(1000);
+        const currentPayment = await api(`/api/payment-status?token=${encodeURIComponent(payment.token)}`);
+        paid = currentPayment.status === 'paid';
+      }
+      if (!paid) throw new Error('Тестовый платёж пока не подтверждён. Попробуйте ещё раз.');
+
+      setStatus('Синхронизируемся с календарной реальностью…');
+      await advance(46, 72, 680);
+      setStatus('Определяем текущий день недели…');
+      await advance(72, 94, 720);
+      const answer = await api(`/api/result?token=${encodeURIComponent(payment.token)}`);
+      setStatus('Истина установлена.');
+      await advance(94, 100, 300);
+      setResult(answer);
+      setPhase(answer.isFriday ? 'friday' : 'not-friday');
+    } catch (error) {
+      if (error.diagnostics) setDiagnosticReport(error.diagnostics);
+      setStatus(error.message || 'Что-то пошло не так.');
+      setPhase('error');
+    }
   }
 
-  function celebrate(){
-    if(navigator.vibrate) navigator.vibrate([120,50,180,50,260]);
-    setConfetti(Array.from({length:180},(_,id)=>({
-      id,left:Math.random()*100,delay:Math.random(),
-      duration:1.8+Math.random()*2.4,hue:Math.random()*360,
-      drift:(Math.random()-.5)*260,size:5+Math.random()*8
-    })));
-    if(sound) playChime();
-    setTimeout(()=>setConfetti([]),5000);
+  function reset() {
+    setPhase('idle');
+    setProgress(0);
+    setProgressStage('verification');
+    setResult(null);
+    setEmailOpen(false);
+    setCheckout(null);
+    setCheckoutOpen(false);
+    setStatus('Готовы проверить календарную реальность.');
+    setDiagnosticReport(null);
   }
 
-  function playChime(){
-    try{
-      const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC();audioRef.current=ctx;
-      [523.25,659.25,783.99,1046.5].forEach((f,i)=>{
-        const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(.0001,ctx.currentTime+i*.13);
-        g.gain.exponentialRampToValueAtTime(.1,ctx.currentTime+i*.13+.02);
-        g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+i*.13+.28);
-        o.connect(g).connect(ctx.destination);o.start(ctx.currentTime+i*.13);o.stop(ctx.currentTime+i*.13+.3);
-      });
-    }catch{}
-  }
-
-  function reset(){setPhase('idle');setResult(null);setProgress(0);setStatus('Готовы проверить календарную реальность.');}
-
-  const finished=phase==='friday'||phase==='no';
+  const hasResult = phase === 'friday' || phase === 'not-friday';
 
   return (
-    <main className={`app phase-${phase}`}>
-      <div className="city" aria-hidden="true">
-        <span className="tower t1"/><span className="tower t2"/><span className="tower t3"/>
-        <span className="tower t4"/><span className="tower t5"/><span className="tower t6"/>
+    <>
+    <main className={`experience desktop-experience phase-${phase}`}>
+      <div className="hero-stage">
+        <Image className="hero-art" src="/city-storm-v41-shadow-fixed.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" unoptimized />
+        <div className="hero-live-price" aria-label={`Стоимость: ${paymentAmount} рублей`}><span aria-hidden="true">{paymentAmount} ₽</span></div>
+        {phase === 'idle' && <><button className="truth-button" onClick={start}><span>Узнать правду</span><b aria-hidden="true">→</b></button>{emailOpen && <form className="email-form" onSubmit={start}><strong>К оплате сейчас: {paymentAmount} ₽</strong><label>Укажите email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /><button type="submit">Перейти к оплате</button></label><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}</>}
       </div>
-      <div className="curtain left"/><div className="curtain right"/>
-      <div className="confetti">{confetti.map(p=><i key={p.id} style={{
-        '--left':p.left+'%','--delay':p.delay+'s','--duration':p.duration+'s',
-        '--hue':p.hue,'--drift':p.drift+'px','--size':p.size+'px'
-      }}/>)}</div>
-
-      <header>
-        <div className="logo">TODAY-FRIDAY<small>СЕРЬЁЗНЫЕ ВОПРОСЫ<br/>ИМЕЮТ ЗНАЧЕНИЕ</small></div>
-        <nav><a href="#about">О проекте</a><a href="#how">Как это работает</a><a href="#faq">FAQ</a></nav>
-      </header>
-
-      <section className="stage">
-        <div className={`storm ${phase==='reveal'?'explode':''} ${finished?'hiddenStorm':''}`} aria-hidden="true">
-          <div className="cloud c1"/><div className="cloud c2"/><div className="cloud c3"/>
-          <div className="cloud c4"/><div className="cloud c5"/>
-          <i className="bolt b1"/><i className="bolt b2"/><i className="bolt b3"/><i className="bolt b4"/>
-        </div>
-
-        <div className="content">
-          {!finished ? (
-            <>
-              <h1>Сегодня<br/><em>пятница?</em></h1>
-              <p className="offer">ПОЛУЧИ ТОЧНЫЙ ОТВЕТ<br/>ВСЕГО ЗА</p>
-              <div className="price">50 ₽</div>
-            </>
-          ) : (
-            <div className="truth">
-              <span>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</span>
-              <h2>{result?.isFriday?'ДА!':'НЕТ.'}</h2>
-              <p>{result?.isFriday?'ДАААА! ЭТО ПЯТНИЦА!':'Мы тоже разочарованы.'}</p>
-            </div>
-          )}
-
-          {phase==='idle' && <button className="cta" onClick={start}>УЗНАТЬ ПРАВДУ <b>→</b></button>}
-          {phase==='processing' && <div className="process">
-            <div><span>{status}</span><b>{progress}%</b></div>
-            <aside><i style={{width:progress+'%'}}/></aside>
-          </div>}
-          {phase==='error' && <div className="process error"><div><span>{status}</span></div><button className="cta" onClick={reset}>ПОВТОРИТЬ <b>↻</b></button></div>}
-          {finished && <button className="cta" onClick={reset}>ПРОВЕРИТЬ ЕЩЁ РАЗ · 50 ₽ <b>↻</b></button>}
-
-          <div className="benefits">
-            <article><strong>♢</strong><b>100% точность</b><span>Проверяем по<br/>реальному времени</span></article>
-            <article><strong>▣</strong><b>Безопасная оплата</b><span>Платежи защищены</span></article>
-            <article><strong>ϟ</strong><b>Моментальный ответ</b><span>Сразу после оплаты</span></article>
-          </div>
-        </div>
+      <div className="ambient-glow" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
+      <section className="interaction" aria-live="polite">
+        {phase === 'processing' && <div className="status-card" role="status"><p>{status}</p>{checkout && !checkoutOpen && <button className="retry-button" type="button" onClick={() => setCheckoutOpen(true)}>Показать QR-код</button>}<div className="progress-label"><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : progressStage === 'payment' ? 'ОПЛАТА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><div className="progress-track"><i style={{ width: `${progress}%` }} /></div></div>}
+        {phase === 'error' && <div className="status-card status-error" role="alert"><p>{status}</p><button className="retry-button" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button></div>}
+        {hasResult && <section className={`result-card ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="retry-button" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button></section>}
       </section>
-
-      <footer>
-        <button className="sound" onClick={()=>setSound(v=>!v)}>{sound?'ЗВУК: ВКЛ':'ЗВУК: ВЫКЛ'}</button>
-        <p>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</p>
-        <span>© 2026</span>
-      </footer>
+      {phase === 'friday' && <div className="celebration" aria-hidden="true" />}
+      <DiagnosticPanel report={diagnosticReport} onClose={() => setDiagnosticReport(null)} />
+      <footer className="desktop-footer"><span>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</span><nav aria-label="Юридическая информация"><a href="/privacy">Политика</a><a href="/offer">Оферта</a><a href="/contacts">Контакты</a></nav></footer>
     </main>
+    <main className={`mobile-experience phase-${phase}`}>
+      <Image className="mobile-art" src="/city-storm-v41-mobile.jpg" alt="Ночной город и грозовое облако" fill priority sizes="100vw" />
+      <div className="mobile-vignette" aria-hidden="true" />
+      <header className="mobile-nav"><span>TODAY-FRIDAY</span><button type="button" aria-label="Открыть меню"><i /><i /><i /></button></header>
+      <section className="mobile-content" aria-live="polite">
+        {phase === 'idle' && <><h1>Сегодня<br />пятница?</h1><p>ПОЛУЧИ ТОЧНЫЙ ОТВЕТ<br />ВСЕГО ЗА</p><strong>{paymentAmount} ₽</strong>{emailOpen && <form className="mobile-email-form" onSubmit={start}><b>К оплате сейчас: {paymentAmount} ₽</b><label>Email для электронного чека<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" /></label><button type="submit">ПЕРЕЙТИ К ОПЛАТЕ</button><p className="privacy-note">Email нужен только для электронного чека. <a href="/privacy">Политика обработки персональных данных</a>.</p></form>}{!emailOpen && <button className="mobile-truth-button" onClick={start}>УЗНАТЬ ПРАВДУ <b aria-hidden="true">→</b></button>}<small>▣&nbsp; Безопасная оплата</small></>}
+        {phase === 'processing' && <div className="mobile-status" role="status"><p>{status}</p>{checkout && !checkoutOpen && <button className="mobile-retry" type="button" onClick={() => setCheckoutOpen(true)}>Показать оплату</button>}<div><span>{progressStage === 'preparation' ? 'ПОДГОТОВКА' : progressStage === 'payment' ? 'ОПЛАТА' : 'ПРОВЕРКА'}</span><b>{progress}%</b></div><i><em style={{ width: `${progress}%` }} /></i></div>}
+        {phase === 'error' && <div className="mobile-status mobile-status-error" role="alert"><p>{status}</p><button className="mobile-retry" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button></div>}
+        {hasResult && <><h1 className="mobile-result-heading">Сегодня<br />пятница?</h1><section className={`mobile-result ${result?.isFriday ? 'is-friday' : ''}`}><p>ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</p><h2>{result?.isFriday ? 'ДА!' : 'НЕТ'}</h2><span>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня ещё не пятница.'}</span><button className="mobile-retry" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button></section></>}
+      </section>
+      {phase === 'idle' && <section className="mobile-benefits" aria-label="Преимущества"><article><b>◌</b><span><strong>100% ТОЧНОСТЬ</strong><small>Проверяем по реальному времени</small></span></article><article><b>▣</b><span><strong>БЕЗОПАСНАЯ ОПЛАТА</strong><small>Платежи защищены</small></span></article><article><b>ϟ</b><span><strong>МОМЕНТАЛЬНЫЙ ОТВЕТ</strong><small>Сразу после оплаты</small></span></article></section>}
+      <footer className="mobile-footer"><span>ПОТОМУ ЧТО ПЯТНИЦА — ЭТО ВАЖНО.</span><nav aria-label="Юридическая информация"><a href="/privacy">Политика</a><a href="/offer">Оферта</a><a href="/contacts">Контакты</a></nav></footer>
+      {phase === 'friday' && <div className="celebration" aria-hidden="true" />}
+    </main>
+      {checkout && checkoutOpen && <div className="checkout-overlay" role="presentation"><section className="checkout-modal" role="dialog" aria-modal="true" aria-label="Оплата через Точку"><button className="checkout-close" type="button" onClick={() => setCheckoutOpen(false)} aria-label="Свернуть окно оплаты">×</button><span className="checkout-eyebrow">TODAY FRIDAY · ОПЛАТА</span><h2>{checkout.amount} ₽</h2><p className="checkout-lead">Сканируйте код телефоном, чтобы открыть защищённую страницу оплаты Точки.</p><div className="checkout-qr"><img src={checkout.qrSrc} alt="QR-код для открытия страницы оплаты Точки на телефоне" width="216" height="216" /></div><p className="checkout-caption">Это QR-ссылка на страницу Точки, не прямой QR СБП. Оплата и чек оформляются банком.</p><a className="checkout-action" href={checkout.paymentUrl}>Открыть оплату в Точке ↗</a><p className="checkout-wait">После оплаты результат появится здесь автоматически.</p></section></div>}
+    </>
   );
 }
