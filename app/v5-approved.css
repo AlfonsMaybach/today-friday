@@ -16,7 +16,7 @@
 .v5-approved-desktop-status .v5-status { margin:0; }
 .v5-approved-result-art { position:absolute; inset:0; background-image:url('/v5-approved-states.png'); background-repeat:no-repeat; background-size:200% 220%; background-position:left top; }
 .v5-no-art { background-position:right top; }
-.v5-approved-retry { position:absolute; z-index:2; bottom:9%; left:50%; transform:translateX(-50%); padding:9px 17px; border:1px solid #e9bc68; border-radius:999px; background:rgba(4,12,22,.88); color:#f7da9d; font:12px Arial,sans-serif; cursor:pointer; }
+.v5-approved-retry { position:absolute; z-index:2; bottom:24%; left:50%; transform:translateX(-50%); padding:9px 17px; border:1px solid #e9bc68; border-radius:999px; background:rgba(4,12,22,.88); color:#f7da9d; font:12px Arial,sans-serif; cursor:pointer; }
 .v5-approved-retry:hover { background:rgba(20,35,49,.95); }
 .v5-approved-result-art .v5-art-legal a:nth-child(1) { left:70.2%; width:12%; }
 .v5-approved-result-art .v5-art-legal a:nth-child(2) { left:83.5%; width:7%; }
