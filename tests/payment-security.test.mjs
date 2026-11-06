@@ -118,3 +118,39 @@ test('mismatched failed operation cannot change database status', async () => {
   assert.equal(result.status, 'pending');
   assert.equal(changed, false);
 });
+
+test('already paid orders never call the bank or modify the database', async () => {
+  const result = await confirmTochkaOrder({ ...storedOrder, status: 'paid' }, {
+    getPayment: async () => { throw new Error('must not call bank'); },
+    markPaidIfMatches: async () => { throw new Error('must not update order'); }
+  });
+  assert.deepEqual(result, { status: 'paid', reason: 'ALREADY_PAID' });
+});
+
+test('missing operation id cannot accidentally mark an order paid', async () => {
+  const result = await confirmTochkaOrder({ ...storedOrder, provider_operation_id: null }, {
+    getPayment: async () => { throw new Error('must not call bank'); },
+    markPaidIfMatches: async () => { throw new Error('must not update order'); }
+  });
+  assert.equal(result.status, 'pending');
+  assert.equal(result.reason, 'OPERATION_MISSING');
+});
+
+test('temporary bank errors never trigger a second payment or paid update', async () => {
+  let paidUpdates = 0;
+  await assert.rejects(confirmTochkaOrder(storedOrder, {
+    getPayment: async () => { throw new Error('bank timeout'); },
+    markPaidIfMatches: async () => { paidUpdates++; return true; }
+  }), /bank timeout/);
+  assert.equal(paidUpdates, 0);
+});
+
+test('rejected bank identity never marks payment failed even with EXPIRED status', async () => {
+  let failedUpdates = 0;
+  const result = await confirmTochkaOrder(storedOrder, {
+    getPayment: async () => ({ Data: { Operation: [{ ...bankOperation, paymentLinkId: 'wrong', status: 'EXPIRED' }] } }),
+    markFailedIfMatches: async () => { failedUpdates++; return true; }
+  });
+  assert.equal(result.status, 'pending');
+  assert.equal(failedUpdates, 0);
+});
