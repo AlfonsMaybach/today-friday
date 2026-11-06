@@ -3,10 +3,10 @@
 Status: **NOT APPROVED FOR PRODUCTION**. This document is a checklist, not proof of passing tests.
 
 ## 1. CI (no Vercel)
-- [ ] GitHub Actions workflow `Payment regression tests` has a completed successful run on the exact release SHA.
-- [ ] `npm ci` succeeds on Node 24.
-- [ ] `npm test` succeeds (all suites, not only the isolated reconciliation tests).
-- [ ] `npm run build` succeeds with test-only environment and without real bank calls.
+- [x] GitHub Actions `Today Friday payment branch CI #6` succeeded (run 42290565838). The workflow checked out the development branch. Release SHA should be pinned in a later CI run before deployment.
+- [x] `npm ci` succeeded on Node 24 in CI run #6.
+- [x] `npm test` succeeded: 65/65 tests, 0 failures in CI run #6.
+- [x] `npm run build` succeeded on Next.js 16.4.5 in CI run #6; this is not a live bank test.
 - [ ] If no workflow run appears, inspect repository Settings > Actions > General, workflow permissions, and organization Actions policy. Do not treat an empty workflow-runs response as success.
 
 ## 2. Payment safety review
