@@ -37,13 +37,25 @@ for (const [name, overrides] of [
   });
 }
 
-test('Preview keeps its live 1 RUB test amount', () => {
+test('Preview uses the same 50 RUB live price as Production', () => {
   const config = checkoutConfiguration({
     VERCEL_ENV: 'preview',
     PAYMENT_PROVIDER: 'tochka',
-    PAYMENT_AMOUNT_KOPECKS: '100',
-    PAYMENT_DISPLAY_AMOUNT_KOPECKS: '5000'
+    PAYMENT_AMOUNT_KOPECKS: '5000',
+    PAYMENT_DISPLAY_AMOUNT_KOPECKS: '5000',
+    PAYMENT_TEST_MODE: 'false',
+    DATABASE_URL: 'present',
+    TOCHKA_JWT: 'present',
+    PAYMENT_WEBHOOK_SECRET: 'present'
   });
   assert.equal(config.ready, true);
-  assert.equal(config.amountKopecks, 100);
+  assert.equal(config.amountKopecks, 5000);
+});
+
+test('Preview rejects an old 1 RUB live payment', () => {
+  assert.equal(checkoutConfiguration({ ...prod, VERCEL_ENV: 'preview', PAYMENT_AMOUNT_KOPECKS: '100' }).ready, false);
+});
+
+test('Preview rejects missing bank credentials', () => {
+  assert.equal(checkoutConfiguration({ ...prod, VERCEL_ENV: 'preview', TOCHKA_JWT: undefined }).ready, false);
 });
