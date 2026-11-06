@@ -1,0 +1,58 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { classifyNetworkError, discoverCustomerAndMerchant, TochkaApiError } from '../lib/tochka.js';
+import { createDiagnostics, startStage, markProviderFailure } from '../lib/payment-diagnostics.js';
+
+test('network diagnostics keep only allowlisted cause codes', () => {
+  assert.equal(classifyNetworkError({ cause: { code: 'ENOTFOUND' } }), 'ENOTFOUND');
+  assert.equal(classifyNetworkError({ cause: { code: 'UND_ERR_CONNECT_TIMEOUT' } }), 'UND_ERR_CONNECT_TIMEOUT');
+  assert.equal(classifyNetworkError({ cause: { code: 'SECRET_URL_VALUE' } }), 'FETCH_FAILED');
+  assert.equal(classifyNetworkError(new TypeError('fetch failed')), 'FETCH_FAILED');
+});
+
+test('network diagnostics inspect nested causes without exposing unknown codes', () => {
+  assert.equal(classifyNetworkError({ cause: { cause: { code: 'CERT_HAS_EXPIRED' } } }), 'CERT_HAS_EXPIRED');
+  assert.equal(classifyNetworkError({ cause: { cause: { code: 'PRIVATE_TOKEN' } } }), 'FETCH_FAILED');
+  assert.equal(classifyNetworkError({ cause: { code: 'UNKNOWN', cause: { code: 'ENOTFOUND' } } }), 'ENOTFOUND');
+});
+
+test('diagnostic regression marks active request stage failed after fetch exception', () => {
+  const report = createDiagnostics();
+  startStage(report, 'HTTP-запрос к Точке');
+  markProviderFailure(report, new TochkaApiError({ stage: 'get-customers:fetch', code: 'ENOTFOUND' }));
+  assert.equal(report.stages[0].result, 'FAILED');
+  assert.equal(report.stages[0].errorCode, 'ENOTFOUND');
+  assert.equal(report.failedStage, 'HTTP-запрос к Точке');
+  assert.equal(report.errorCode, 'ENOTFOUND');
+});
+
+test('missing JWT is classified before fetch', async () => {
+  const previous = process.env.TOCHKA_JWT;
+  delete process.env.TOCHKA_JWT;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => { throw new Error('fetch must not run'); };
+  await assert.rejects(() => discoverCustomerAndMerchant(), (error) => {
+    assert.ok(error instanceof TochkaApiError);
+    assert.equal(error.code, 'AUTH_CONFIG_MISSING');
+    assert.equal(error.status, 0);
+    return true;
+  });
+  globalThis.fetch = originalFetch;
+  if (previous === undefined) delete process.env.TOCHKA_JWT; else process.env.TOCHKA_JWT = previous;
+});
+
+test('HTTP request stage succeeds only after Response is received', async () => {
+  const previous = process.env.TOCHKA_JWT;
+  process.env.TOCHKA_JWT = 'test-only';
+  const events = [];
+  const requestFn = async (url) => {
+    const body = url.includes('/open-banking/') ? { Data: { Customer: { customerType: 'Business', customerCode: 'c1' } } } : { Data: { Retailer: { merchantId: 'm1' } } };
+    return { status: 200, ok: true, text: async () => JSON.stringify(body) };
+  };
+  await discoverCustomerAndMerchant((name, status, result) => events.push({ name, status, result }), requestFn);
+  const requestEvents = events.filter((event) => event.name === 'HTTP-запрос к Точке');
+  assert.deepEqual(requestEvents.map((event) => event.result), ['START', 'SUCCESS', 'START', 'SUCCESS']);
+  assert.equal(requestEvents[1].status, 200);
+  assert.equal(requestEvents[3].status, 200);
+  if (previous === undefined) delete process.env.TOCHKA_JWT; else process.env.TOCHKA_JWT = previous;
+});

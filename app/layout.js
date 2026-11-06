@@ -1,4 +1,5 @@
 import './globals.css';
+import './legal.css';
 
 export const metadata = {
   title: 'Сегодня пятница?',
