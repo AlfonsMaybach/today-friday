@@ -35,7 +35,9 @@ export async function GET(request) {
       amount: payment.amount,
       currency: payment.currency
     });
-  } catch {
-    return NextResponse.json({ error: 'Платёж не найден.' }, { status: 404 });
+  } catch (error) {
+    // Never expose provider responses, credentials or internal database details to clients.
+    console.error('payment_status_check_failed', { name: error?.name || 'UnknownError', code: error?.code || 'UNEXPECTED_ERROR' });
+    return NextResponse.json({ error: 'Не удалось проверить платёж. Повторите попытку позже.' }, { status: 503 });
   }
 }
