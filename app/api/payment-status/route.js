@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { checkoutConfiguration } from '../../../lib/checkout-configuration';
 import { readPaymentToken } from '../../../lib/payment-token';
 import { getOrder, consumeRateLimit } from '../../../lib/db';
 import { confirmTochkaOrder } from '../../../lib/payment-confirmation';
@@ -24,6 +25,7 @@ export async function GET(request) {
       const status = confirmation.status;
       return NextResponse.json({ paymentId: order.provider_operation_id, status, amount: order.amount_kopecks / 100, currency: order.currency });
     }
+    if (checkoutConfiguration().production) return NextResponse.json({ error: 'Требуется подтверждённый банковский заказ.' }, { status: 403 });
     const token = new URL(request.url).searchParams.get('token');
     const payment = readPaymentToken(token);
 
