@@ -1,7 +1,4 @@
-/* TODAY FRIDAY V5.0: all interface elements are native text and controls.
-   No letters, prices, buttons, or QR codes are embedded in the background photo.
-   Background: Unsplash free photo by photographer of https://unsplash.com/photos/a-view-of-the-back-of-a-boat-on-the-water-78l-Rg_-1cI
-   Temporary clean photo pending an exact text-free export of the approved V5 mockup. */
+/* V5 fallback styling. The approved image is used as the sole visual source. */
 .v5-shell {
   --v5-gold:#ffda7c; --v5-cream:#fff5e8; --v5-dark:#06121d;
   position:relative; isolation:isolate; min-height:100svh; overflow:hidden;
@@ -9,7 +6,7 @@
 }
 .v5-scene {
   position:absolute; inset:0; z-index:-3;
-  background-image:url('https://images.unsplash.com/photo-1773593893090-27d17a880a07?auto=format&fit=crop&w=2400&q=85');
+  background-image:url('/v5-approved-landing.png');
   background-position:center 53%; background-size:cover;
   filter:brightness(.66) saturate(1.28) contrast(1.1);
 }
