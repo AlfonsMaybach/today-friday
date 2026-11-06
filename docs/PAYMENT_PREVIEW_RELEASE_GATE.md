@@ -20,7 +20,7 @@ Status: **NOT APPROVED FOR PRODUCTION**. This document is a checklist, not proof
 - [ ] Confirm that existing orders remain unchanged; do not migrate or rewrite historic 1 RUB orders.
 
 ## 3. Release boundaries
-- [ ] Review the four main-only commits before integrating this diverged branch (do not force-merge).
+- [x] Reviewed the three affected paths in main-only changes: `app/api/create-payment/route.js`, `app/layout.js`, and `app/page.js`. Main still uses a stub payment provider; development branch has real Tochka integration. Do not overwrite the development branch with main's stub checkout. The remaining integration must be reviewed with a successful build before merge.
 - [ ] Run one controlled Preview build only after CI passes and Vercel build limit clears.
 - [ ] Verify email entry, payment link/QR, real 50 RUB SBP checkout, bank return, server-side confirmation, receipt and result access on Preview.
 - [ ] Check same-browser retry and no-cookie unauthorized access.
