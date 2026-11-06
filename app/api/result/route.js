@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { checkoutConfiguration } from '../../../lib/checkout-configuration';
 import { readPaymentToken } from '../../../lib/payment-token';
 import { isFridayNow } from '../../../lib/friday';
 import { getOrder } from '../../../lib/db';
@@ -19,6 +20,7 @@ export async function GET(request) {
       const isFriday = isFridayNow();
       return NextResponse.json({ isFriday, answer: isFriday ? 'ДА!' : 'НЕТ' });
     }
+    if (checkoutConfiguration().production) return NextResponse.json({ error: 'Требуется подтверждённый банковский заказ.' }, { status: 403 });
     const token = new URL(request.url).searchParams.get('token');
     const payment = readPaymentToken(token);
 
