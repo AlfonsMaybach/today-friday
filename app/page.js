@@ -41,6 +41,22 @@ export default function Home() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [diagnosticReport, setDiagnosticReport] = useState(null);
   const timerRef = useRef(null);
+  const desktopArtRef = useRef(null);
+  const [desktopArtSize, setDesktopArtSize] = useState(null);
+
+  useEffect(() => {
+    const fitDesktopArtwork = () => {
+      const image = desktopArtRef.current;
+      if (!image?.naturalWidth || !image?.naturalHeight) return;
+      const width = window.innerWidth;
+      const height = Math.max(window.innerHeight, 560);
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      setDesktopArtSize({ width: image.naturalWidth * scale, height: image.naturalHeight * scale });
+    };
+    fitDesktopArtwork();
+    window.addEventListener('resize', fitDesktopArtwork);
+    return () => window.removeEventListener('resize', fitDesktopArtwork);
+  }, []);
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
   useEffect(() => {
@@ -220,8 +236,13 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="v5-approved-desktop">
-              <img src="/v5-approved-landing-70.png" alt="Сегодня пятница? Узнай прямо сейчас и получи ответ за 50 рублей. Скидка с 99 до 50 рублей. 100% точность, безопасная оплата, моментальный ответ." className="v5-approved-art" />
+            <div className="v5-approved-desktop" style={desktopArtSize ? { width: desktopArtSize.width, height: desktopArtSize.height } : undefined}>
+              <img ref={desktopArtRef} onLoad={() => {
+                const image = desktopArtRef.current;
+                if (!image?.naturalWidth || !image?.naturalHeight) return;
+                const scale = Math.max(window.innerWidth / image.naturalWidth, Math.max(window.innerHeight, 560) / image.naturalHeight);
+                setDesktopArtSize({ width: image.naturalWidth * scale, height: image.naturalHeight * scale });
+              }} src="/v5-approved-landing-70.png" alt="Сегодня пятница? Узнай прямо сейчас и получи ответ за 50 рублей. Скидка с 99 до 50 рублей. 100% точность, безопасная оплата, моментальный ответ." className="v5-approved-art" />
               {phase === 'idle' && <button type="button" className="v5-art-start" onClick={start} aria-label="Узнать сейчас, 50 рублей" />}
               <nav className="v5-art-legal" aria-label="Юридическая информация">
                 <a href="/privacy" aria-label="Политика конфиденциальности" /><a href="/offer" aria-label="Оферта" /><a href="/contacts" aria-label="Контакты" />
