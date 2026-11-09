@@ -2,9 +2,11 @@
    The 30% reduction was applied only to the original footer feature crops. */
 .v5-approved { position:relative; display:flex; justify-content:center; align-items:center; min-height:100svh; overflow:hidden; background:#06111d; }
 .v5-approved-frame { position:relative; width:100%; height:100svh; min-height:560px; overflow:hidden; }
+/* Full-bleed backdrop remains behind the proportionally fitted artwork. */
+.v5-approved-frame::before { content:''; position:absolute; inset:-3%; background:url('/v5-approved-landing-70.png') center center / cover no-repeat; filter:blur(26px) brightness(.55); pointer-events:none; }
 /* Cover the viewport without distorting lettering; hotspots follow the artwork. */
-.v5-approved-desktop { position:absolute; top:50%; left:50%; width:max(100%,150svh); aspect-ratio:3 / 2; transform:translate(-50%,-50%); }
-.v5-approved-art { display:block; width:100%; height:100%; object-fit:contain; }
+.v5-approved-desktop { position:absolute; top:50%; left:50%; width:min(100%,150svh); aspect-ratio:3 / 2; transform:translate(-50%,-50%); }
+.v5-approved-art { display:block; width:100%; height:100%; object-fit:contain; mask-image:linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%); }
 .v5-art-start { position:absolute; left:30.5%; top:60.6%; width:39.4%; height:12.5%; border:0; border-radius:999px; background:transparent; cursor:pointer; }
 .v5-art-start:hover { box-shadow:inset 0 0 0 3px rgba(255,255,255,.35); }
 .v5-art-start:focus-visible,.v5-art-legal a:focus-visible { outline:3px solid #fff; outline-offset:3px; }
