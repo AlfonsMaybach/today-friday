@@ -50,7 +50,7 @@ export default function Home() {
       if (!image?.naturalWidth || !image?.naturalHeight) return;
       const width = window.innerWidth;
       const height = Math.max(window.innerHeight, 560);
-      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const scale = 0.96 * Math.min(width / image.naturalWidth, height / image.naturalHeight);
       setDesktopArtSize({ width: image.naturalWidth * scale, height: image.naturalHeight * scale });
     };
     fitDesktopArtwork();
@@ -240,7 +240,7 @@ export default function Home() {
               <img ref={desktopArtRef} onLoad={() => {
                 const image = desktopArtRef.current;
                 if (!image?.naturalWidth || !image?.naturalHeight) return;
-                const scale = Math.max(window.innerWidth / image.naturalWidth, Math.max(window.innerHeight, 560) / image.naturalHeight);
+                const scale = 0.96 * Math.min(window.innerWidth / image.naturalWidth, Math.max(window.innerHeight, 560) / image.naturalHeight);
                 setDesktopArtSize({ width: image.naturalWidth * scale, height: image.naturalHeight * scale });
               }} src="/v5-approved-landing-70.png" alt="Сегодня пятница? Узнай прямо сейчас и получи ответ за 50 рублей. Скидка с 99 до 50 рублей. 100% точность, безопасная оплата, моментальный ответ." className="v5-approved-art" />
               {phase === 'idle' && <button type="button" className="v5-art-start" onClick={start} aria-label="Узнать сейчас, 50 рублей" />}
