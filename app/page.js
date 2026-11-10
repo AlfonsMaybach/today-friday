@@ -4,6 +4,7 @@ import qrcode from 'qrcode-generator';
 import { useEffect, useRef, useState } from 'react';
 import DiagnosticPanel from './components/DiagnosticPanel';
 import './v5.css';
+import './v5-approved.css';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -209,44 +210,47 @@ export default function Home() {
   const hasResult = phase === 'friday' || phase === 'not-friday';
 
   return (
-    <main className={`v5-shell v5-phase-${phase}`}>
-      <div className="v5-scene" aria-hidden="true" />
-      <div className="v5-vignette" aria-hidden="true" />
-      <div className="v5-layout">
-        <section className="v5-content" aria-live="polite">
-          <h1 className="v5-heading">Сегодня<br /><em>пятница?</em></h1>
-          {phase === 'idle' && <>
-            <p className="v5-subheading">Узнай прямо сейчас<br />и получи ответ за {paymentAmount} рублей</p>
-            <div className="v5-prices" aria-label={`Скидка: раньше 99 рублей, сейчас ${paymentAmount} рублей`}>
-              <del className="v5-old-price" aria-hidden="true">99 ₽</del>
-              <strong className="v5-new-price" aria-hidden="true">{paymentAmount} ₽</strong>
+    <main className={`v5-shell v5-approved v5-phase-${phase}`}>
+      <div className="v5-approved-frame">
+        {hasResult ? (
+          <div className={`v5-approved-result-art ${result?.isFriday ? 'v5-yes-art' : 'v5-no-art'}`} role="img" aria-label={result?.isFriday ? 'Официальный результат: ДА! Сегодня действительно пятница.' : 'Официальный результат: НЕТ! Сегодня не пятница.'}>
+            <button type="button" className="v5-approved-retry" onClick={reset} aria-label="Проверить ещё раз">Проверить ещё раз · {paymentAmount} ₽</button>
+            <nav className="v5-art-legal" aria-label="Юридическая информация">
+              <a href="/privacy" aria-label="Политика конфиденциальности" /><a href="/offer" aria-label="Оферта" /><a href="/contacts" aria-label="Контакты" />
+            </nav>
+          </div>
+        ) : (
+          <>
+            <div className="v5-approved-desktop">
+              <img src="/v5-approved-landing-70.png" alt="Сегодня пятница? Узнай прямо сейчас и получи ответ за 50 рублей. Скидка с 99 до 50 рублей. 100% точность, безопасная оплата, моментальный ответ." className="v5-approved-art" />
+              {phase === 'idle' && <button type="button" className="v5-art-start" onClick={start} aria-label="Узнать сейчас, 50 рублей" />}
+              <nav className="v5-art-legal" aria-label="Юридическая информация">
+                <a href="/privacy" aria-label="Политика конфиденциальности" /><a href="/offer" aria-label="Оферта" /><a href="/contacts" aria-label="Контакты" />
+              </nav>
             </div>
-            <button className="v5-gold-button" type="button" onClick={start}>Узнать сейчас</button>
-          </>}
-          {phase === 'processing' && <section className="v5-status" role="status">
-            <span className="v5-kicker">{progressStage === 'payment' ? 'ОЖИДАНИЕ ОПЛАТЫ' : 'ПРОВЕРКА'}</span>
-            <p>{status}</p>
-            <div className="v5-progress"><i style={{ width: `${progress}%` }} /></div>
-            <small>{progressStage === 'payment' ? 'Результат появится после подтверждения банка' : `${progress}%`}</small>
-            {checkout && !checkoutOpen && <button type="button" className="v5-secondary-button" onClick={() => setCheckoutOpen(true)}>Показать QR-код</button>}
-          </section>}
-          {phase === 'error' && <section className="v5-status v5-error" role="alert">
-            <span className="v5-kicker">НЕ УДАЛОСЬ ЗАВЕРШИТЬ</span><p>{status}</p>
-            <button type="button" className="v5-secondary-button" onClick={checkout ? () => { setCheckoutOpen(true); setPhase('processing'); } : reset}>{checkout ? 'Проверить оплату' : 'Попробовать ещё раз'}</button>
-          </section>}
-          {hasResult && <section className="v5-result" aria-label="Результат проверки">
-            <span className="v5-kicker">ОФИЦИАЛЬНЫЙ РЕЗУЛЬТАТ</span>
-            <h2>{result?.isFriday ? 'ДА!' : 'НЕТ!'}</h2>
-            <p>{result?.isFriday ? 'Сегодня действительно пятница.' : 'Сегодня не пятница.'}</p>
-            <button className="v5-secondary-button" type="button" onClick={reset}>Проверить ещё раз · {paymentAmount} ₽</button>
-          </section>}
-        </section>
-        <Features />
-        <nav className="v5-legal" aria-label="Юридическая информация">
-          <a href="/privacy">Политика конфиденциальности</a><span aria-hidden="true">|</span>
-          <a href="/offer">Оферта</a><span aria-hidden="true">|</span>
-          <a href="/contacts">Контакты</a>
-        </nav>
+            <div className="v5-approved-mobile">
+              <h1 className="v5-heading">Сегодня<br />пятница?</h1>
+              {phase === 'idle' && <>
+                <p className="v5-subheading">Узнай прямо сейчас<br />и получи ответ за {paymentAmount} рублей</p>
+                <div className="v5-prices"><del className="v5-old-price">99 ₽</del><strong className="v5-new-price">{paymentAmount} ₽</strong></div>
+                <button type="button" className="v5-gold-button" onClick={start}>Узнать сейчас</button>
+              </>}
+              {phase === 'processing' && <section className="v5-status" role="status"><span className="v5-kicker">ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ</span><p>{status}</p><div className="v5-progress"><i style={{width:`${progress}%`}} /></div><small>{progressStage === 'payment' ? 'Результат появится после подтверждения банка' : `${progress}%`}</small>{checkout && !checkoutOpen && <button type="button" className="v5-secondary-button" onClick={() => setCheckoutOpen(true)}>Показать оплату</button>}</section>}
+              {phase === 'error' && <section className="v5-status" role="alert"><p>{status}</p><button type="button" className="v5-secondary-button" onClick={checkout ? () => {setCheckoutOpen(true);setPhase('processing');} : reset}>Повторить</button></section>}
+              <Features />
+              <nav className="v5-legal" aria-label="Юридическая информация"><a href="/privacy">Политика конфиденциальности</a><span>|</span><a href="/offer">Оферта</a><span>|</span><a href="/contacts">Контакты</a></nav>
+            </div>
+            {phase !== 'idle' && <div className="v5-approved-desktop-status">
+              <section className="v5-status" role={phase === 'error' ? 'alert' : 'status'}>
+                <span className="v5-kicker">{phase === 'error' ? 'ПРОВЕРКА НЕ ЗАВЕРШЕНА' : 'ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ'}</span>
+                <p>{status}</p>
+                {phase === 'processing' && <><div className="v5-progress"><i style={{width:`${progress}%`}} /></div><small>{progressStage === 'payment' ? 'Результат появится после подтверждения банка' : `${progress}%`}</small></>}
+                {checkout && !checkoutOpen && <button type="button" className="v5-secondary-button" onClick={() => {setCheckoutOpen(true);setPhase('processing');}}>Показать QR-код</button>}
+                {phase === 'error' && !checkout && <button type="button" className="v5-secondary-button" onClick={reset}>Попробовать ещё раз</button>}
+              </section>
+            </div>}
+          </>
+        )}
       </div>
       {emailOpen && phase === 'idle' && <div className="v5-overlay" role="presentation">
         <form className="v5-modal v5-email-modal" onSubmit={start} aria-label="Электронный чек">
