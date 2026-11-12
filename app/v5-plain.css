@@ -1,0 +1,58 @@
+/* TODAY FRIDAY V5: interchangeable solid-color backdrop, no baked-in text.
+   All four application states share real, independently responsive HTML elements.
+   Checkout/email dialogs intentionally retain their existing .v5-modal styles. */
+.v5-shell.v5-plain { --page-bg:#e8dcc7; --page-ink:#28231d; --page-muted:#625747; --page-gold:#9b691c; background:var(--page-bg); color:var(--page-ink); overflow-x:hidden; overflow-y:auto; }
+.v5-plain-page { min-height:100svh; width:100%; display:flex; flex-direction:column; align-items:center; padding:clamp(22px,3.5vh,40px) clamp(16px,3vw,40px) 16px; text-align:center; }
+.v5-plain-header { flex:0 0 auto; width:100%; }
+.v5-plain-title { margin:0; font:normal clamp(46px,5vw,76px)/.96 Georgia,'Times New Roman',serif; letter-spacing:-.035em; color:var(--page-ink); }
+.v5-plain-motto { margin:clamp(8px,1.5vh,16px) 0 0; font:italic clamp(12px,1.1vw,16px)/1.4 Georgia,serif; color:var(--page-muted); }
+.v5-plain-main { width:100%; display:flex; flex-direction:column; align-items:center; flex:1 0 auto; justify-content:center; padding:clamp(16px,3vh,32px) 0; }
+.v5-plain-subtitle { margin:0; font:normal clamp(19px,2.1vw,30px)/1.2 Georgia,serif; }
+.v5-plain .v5-prices { margin:clamp(20px,3vh,32px) 0 clamp(20px,3vh,30px); gap:clamp(18px,3vw,38px); }
+.v5-plain .v5-old-price { color:#4c4136; font-size:clamp(30px,3.4vw,48px); text-shadow:none; }
+.v5-plain .v5-old-price::after { height:3px; }
+.v5-plain .v5-new-price { font-size:clamp(36px,4.3vw,60px); padding:3px clamp(25px,4vw,46px) 6px; }
+.v5-plain .v5-gold-button.v5-plain-cta { min-width:0; width:min(460px,92vw); padding:clamp(12px,1.8vh,18px) 22px; font-size:clamp(25px,2.8vw,38px); }
+.v5-plain-footer { flex:0 0 auto; width:100%; display:flex; flex-direction:column; align-items:center; gap:clamp(12px,2vh,22px); margin-top:auto; }
+.v5-plain .v5-features { width:min(590px,95vw); margin:0 auto; }
+.v5-plain .v5-features article+article { border-color:#ac8242; }
+.v5-plain .v5-features svg { stroke:#9b691c; }
+.v5-plain .v5-features strong { color:#2b251e; font-size:clamp(9px,.9vw,12px); }
+.v5-plain .v5-features span { color:#524638; font-size:clamp(10px,.9vw,12px); }
+.v5-plain .v5-legal { width:100%; justify-content:flex-end; align-self:stretch; flex-wrap:wrap; margin:0; gap:12px; color:#6e5430; font-size:clamp(10px,.9vw,13px); }
+.v5-plain .v5-legal a { color:#4d3a24; text-decoration-color:#9b691c; }
+.v5-plain-panel { margin:auto!important; color:#fff5e8; text-align:left; }
+.v5-plain-result { width:min(580px,95vw); margin:auto; padding:clamp(20px,3vw,36px); display:flex; flex-direction:column; align-items:center; gap:clamp(8px,1.5vh,14px); border:2px solid #b78b44; border-radius:24px; background:#f7edda; box-shadow:0 12px 35px rgba(73,52,22,.12); }
+.v5-plain-result-label { color:#805c24; font:700 clamp(10px,1vw,13px)/1.4 Arial,sans-serif; letter-spacing:.16em; }
+.v5-plain-answer { color:#65431c; font:italic 400 clamp(78px,10vw,138px)/1 Georgia,serif; }
+.v5-plain-result p { margin:0; font-size:clamp(18px,1.8vw,25px); }
+.v5-plain-result .v5-secondary-button { margin-top:8px; }
+.v5-plain .v5-overlay,.v5-plain .v5-modal { color:#fff5e8; }
+@media(max-width:700px) {
+ .v5-plain-page { padding:clamp(20px,5vh,44px) 12px 16px; min-height:100svh; }
+ .v5-plain-title { font-size:clamp(43px,11vw,65px); }
+ .v5-plain-motto { font-size:12px; }
+ .v5-plain-subtitle { font-size:clamp(18px,5vw,24px); }
+ .v5-plain-main { padding:24px 0; }
+ .v5-plain .v5-prices { gap:18px; margin:24px 0; }
+ .v5-plain .v5-old-price { font-size:34px; }
+ .v5-plain .v5-new-price { font-size:43px; padding:5px 22px; }
+ .v5-plain .v5-gold-button.v5-plain-cta { width:min(360px,94vw); font-size:clamp(25px,7vw,33px); padding:15px 12px; }
+ .v5-plain .v5-features { width:100%; }
+ .v5-plain .v5-features article { padding:0 4px; }
+ .v5-plain .v5-features strong { font-size:8px; }
+ .v5-plain .v5-features span { font-size:9px; }
+ .v5-plain .v5-legal { justify-content:center; gap:8px; font-size:10px; }
+ .v5-plain-result { margin:clamp(25px,5vh,50px) auto; }
+ .v5-plain-answer { font-size:clamp(75px,22vw,105px); }
+}
+@media(max-height:700px) and (min-width:701px) {
+ .v5-plain-page { padding-top:12px; }
+ .v5-plain-title { font-size:clamp(43px,5vw,58px); }
+ .v5-plain-main { padding:10px 0; }
+ .v5-plain-subtitle { font-size:22px; }
+ .v5-plain .v5-prices { margin:12px 0; }
+ .v5-plain .v5-new-price { font-size:42px; }
+ .v5-plain .v5-gold-button.v5-plain-cta { font-size:28px; padding:10px 20px; }
+ .v5-plain-footer { gap:8px; }
+}
