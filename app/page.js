@@ -4,7 +4,7 @@ import qrcode from 'qrcode-generator';
 import { useEffect, useRef, useState } from 'react';
 import DiagnosticPanel from './components/DiagnosticPanel';
 import './v5.css';
-import './v5-approved.css';
+import './v5-plain.css';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
