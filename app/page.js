@@ -42,6 +42,7 @@ export default function Home() {
   const [diagnosticReport, setDiagnosticReport] = useState(null);
   const timerRef = useRef(null);
 
+
   useEffect(() => () => clearTimeout(timerRef.current), []);
   useEffect(() => {
     fetch('/api/payment-config').then((response) => response.json()).then((config) => {
