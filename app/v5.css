@@ -6,9 +6,9 @@
 }
 .v5-scene {
   position:absolute; inset:0; z-index:-3;
-  background-image:url('/v5-approved-landing.png');
+  background-image:url('/city-storm-v41.png');
   background-position:center 53%; background-size:cover;
-  filter:brightness(.66) saturate(1.28) contrast(1.1);
+  filter:brightness(.72) saturate(1.12) contrast(1.05);
 }
 .v5-vignette {
   position:absolute; inset:0; z-index:-2; pointer-events:none;
