@@ -2,8 +2,11 @@
    The 30% reduction was applied only to the original footer feature crops. */
 .v5-approved { position:relative; display:flex; justify-content:center; align-items:center; min-height:100svh; overflow:hidden; background:#06111d; }
 .v5-approved-frame { position:relative; width:100%; height:100svh; min-height:560px; overflow:hidden; }
-.v5-approved-desktop { position:absolute; inset:0; }
-.v5-approved-art { display:block; width:100%; height:100%; object-fit:fill; }
+/* Full-bleed backdrop remains behind the proportionally fitted artwork. */
+.v5-approved-frame::before { content:''; position:absolute; inset:-3%; background:url('/v5-approved-landing-70.png') center center / cover no-repeat; filter:blur(26px) brightness(.55); pointer-events:none; }
+/* Cover the viewport without distorting lettering; hotspots follow the artwork. */
+.v5-approved-desktop { position:absolute; top:50%; left:50%; width:min(100%,150svh); aspect-ratio:3 / 2; transform:translate(-50%,-50%); }
+.v5-approved-art { display:block; width:100%; height:100%; object-fit:contain; mask-image:linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%); }
 .v5-art-start { position:absolute; left:30.5%; top:60.6%; width:39.4%; height:12.5%; border:0; border-radius:999px; background:transparent; cursor:pointer; }
 .v5-art-start:hover { box-shadow:inset 0 0 0 3px rgba(255,255,255,.35); }
 .v5-art-start:focus-visible,.v5-art-legal a:focus-visible { outline:3px solid #fff; outline-offset:3px; }
@@ -43,4 +46,32 @@
   .v5-approved-result-art .v5-art-legal { display:none; }
   .v5-approved .v5-qr-frame { display:grid; }
   .v5-approved .v5-qr-note { display:block; }
+}
+
+
+/* Desktop: keep the approved art at its intrinsic 1526:1024 proportions.
+   Crop only overflow, never distort the lettering or shrink the entire page. */
+@media (min-width:701px) {
+  .v5-approved-frame { height:100svh; min-height:560px; }
+  .v5-approved-frame::before { display:none; }
+  .v5-approved-desktop {
+    position:absolute; top:0; left:50%;
+    width:max(100vw,148.99svh); height:auto; aspect-ratio:1526 / 1024;
+    transform:translateX(-50%);
+  }
+  .v5-approved-art { display:block; width:100%; height:100%; object-fit:contain; mask-image:none; }
+  .v5-art-legal { position:fixed; inset:auto 0 0; height:40px; z-index:3;
+    display:flex; align-items:center; justify-content:flex-end; gap:18px;
+    padding:0 3vw; background:linear-gradient(transparent,rgba(2,10,19,.84));
+  }
+  .v5-art-legal a { position:static!important; width:auto!important; height:auto!important;
+    color:#fff3df; font:14px Georgia,serif; text-decoration:underline; }
+  .v5-art-legal a:nth-child(1)::after { content:'Политика конфиденциальности'; }
+  .v5-art-legal a:nth-child(2)::after { content:'Оферта'; }
+  .v5-art-legal a:nth-child(3)::after { content:'Контакты'; }
+  .v5-art-start { z-index:2; }
+}
+/* On phones, use the right-hand ocean and sun rather than the text-bearing center of the image. */
+@media(max-width:700px) {
+  .v5-approved-mobile { background-position:center,right center; background-size:cover,auto 100%; }
 }
